@@ -6,9 +6,6 @@
 ## execution time
 06:58:08
 
-## dataset
-WISDM dataset
-
 ## model name
 1D-CNN
 
