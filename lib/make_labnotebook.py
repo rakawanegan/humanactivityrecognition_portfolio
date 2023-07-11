@@ -1,14 +1,11 @@
-import datetime
-
-def create_experiment_memo(title, content):
-    current_date = datetime.datetime.now().strftime("%Y%m%d")
-    file_name = f"{current_date}_{title}.md"
+def create_experiment_memo(title, date, content):
+    file_name = f"{date.strftime("%Y%m%d")}_{title}.md"
     
     with open(file_name, "w") as f:
         f.write(content)
 
-def generate_experiment_memo(title, experiment_info):
-    memo_content = f"# 実験メモ\n\n## 日付\n{datetime.datetime.now().strftime('%Y年%m月%d日')}\n"
+def generate_experiment_memo(title, date, experiment_info):
+    memo_content = f"# 実験メモ\n\n## 日付\n{date}\n"
     
     for key, value in experiment_info.items():
         memo_content += f"\n## {key}\n{value}\n"
@@ -18,7 +15,9 @@ def generate_experiment_memo(title, experiment_info):
 
 # Usage
 if "__name__" == "__main__":
-	# 実験メモのタイトルと内容を指定
+        import datetime
+	# 実験メモの日時、タイトル、内容を指定
+	date = atetime.datetime.now()
 	memo_title = "My Experiment"
 	experiment_info = {
  	   "目的": "機械学習モデルの性能評価",
@@ -30,4 +29,4 @@ if "__name__" == "__main__":
    	 "追加実験の計画": "学習率を変更して再実験を行う。"
 	}
 	# 実験メモを生成
-	generate_experiment_memo(memo_title, experiment_info)
+	generate_experiment_memo(memo_title, date..strftime('%Y年%m月%d日') experiment_info)
