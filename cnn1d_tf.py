@@ -1,0 +1,91 @@
+import keras
+import numpy as np  # linear algebra
+import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
+import seaborn as sns
+from keras.layers import Conv1D, Dense, Dropout, GlobalMaxPooling1D
+from keras.models import Model, Sequential
+from keras.utils.np_utils import to_categorical
+from matplotlib import pyplot as plt
+from scipy import stats
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
+from lib.preprocess import get_data
+
+# Same labels will be reused throughout the program
+LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
+# The number of steps within one time segment
+TIME_PERIODS = 80
+# The steps to take from one segment to the next; if this value is equal to
+# TIME_PERIODS, then there is no overlap between the segments
+STEP_DISTANCE = 40
+# x, y, z acceleration as features
+N_FEATURES = 3
+# Define column name of the label vector
+LABEL = "ActivityEncoded"
+# set random seed
+SEED = 314
+
+x_train, x_test, y_train, y_test = get_data(
+    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
+)
+
+model = Sequential()
+model.add(
+    Conv1D(160, 12, input_shape=(x_train.shape[1], x_train.shape[2]), activation="relu")
+)
+model.add(Conv1D(128, 10, activation="relu"))
+model.add(Conv1D(96, 8, activation="relu"))
+model.add(Conv1D(64, 6, activation="relu"))
+model.add(GlobalMaxPooling1D())
+model.add(Dropout(0.5))
+model.add(Dense(6, activation="softmax"))
+
+print(model.summary())
+
+model.compile(
+    loss="categorical_crossentropy", optimizer="rmsprop", metrics=["accuracy"]
+)
+
+history = model.fit(
+    x_train,
+    y_train,
+    validation_data=(x_test, y_test),
+    epochs=150,
+    batch_size=1024,
+)
+
+y_pred = model.predict(x_test)
+y_test = y_test.argmax(axis=-1)
+
+# Creates a confusion matrix
+cm = confusion_matrix(y_test, y_pred.argmax(axis=-1))
+
+# Transform to df for easier plotting
+cm_df = pd.DataFrame(cm, index=LABELS, columns=LABELS)
+
+plt.figure(figsize=(10, 10))
+sns.heatmap(
+    cm_df,
+    annot=True,
+    fmt="d",
+    linewidths=0.5,
+    cmap="Blues",
+    cbar=False,
+    annot_kws={"size": 14},
+    square=True,
+)
+plt.title(
+    "Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred.argmax(axis=-1)))
+)
+plt.ylabel("True label")
+plt.xlabel("Predicted label")
+plt.savefig("tf1dcnn_predict.png")
+
+print(classification_report(y_test, y_pred.argmax(axis=-1), target_names=LABELS))
+
+sample = x_train[3199].reshape(1, TIME_PERIODS, N_FEATURES)
+outputs = [model.layers[i].output for i in range(7)]
+model_view = Model(inputs=model.inputs, outputs=outputs)
+model_view.summary()
