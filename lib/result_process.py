@@ -28,7 +28,7 @@ def create_experiment_memo(dir, content):
         f.write(content)
 
 def generate_experiment_memo(dir:str, date, experiment_info:dict):
-    memo_content = f"# Lab Notebook\n\n## date\n{date}\n"
+    memo_content = f"# Lab Notebook\n\n"
 
     for key, value in experiment_info.items():
         memo_content += f"\n## {key}\n{value}\n"
