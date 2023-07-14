@@ -5,6 +5,22 @@ from matplotlib import pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
+def convert_to_markdown_table(input_string):
+    lines = input_string.strip().split('\n')
+    headers = lines[0].split()
+    data = [line.split() for line in lines[1:]]
+
+    # Generate the table header
+    table = '| ' + ' | '.join(headers) + ' |\n'
+    table += '| ' + ' | '.join(['---'] * len(headers)) + ' |\n'
+
+    # Generate the table rows
+    for row in data:
+        table += '| ' + ' | '.join(row) + ' |\n'
+
+    return table
+
+
 def create_experiment_memo(dir, content):
     file_name = os.path.join(dir, "lab_notebook.md")
 
@@ -64,7 +80,7 @@ def result_process(name):
     content["Model name"] = param.pop("MODEL_NAME")
     content["Start date"] = param.pop("start_date")
     content["End date"] = param.pop("end_date")
-    content["Report"] = report
+    content["Report"] = convert_to_markdown_table(report)
     if study is not None:
         content["Optuna's param"] = best_trial
         content["Optuna search space"] = param.pop("search_space")
@@ -72,4 +88,4 @@ def result_process(name):
     content["Model size"] = f"{model.__sizeof__()/1e+6} MB"
     content["Confusion_matrix"] = "![alt](./cross-tab.png)"
 
-    generate_experiment_memo(f"result/{name}/processed/", content["start_date"], content)
+    generate_experiment_memo(f"result/{name}/processed/", content["Start date"], content)
