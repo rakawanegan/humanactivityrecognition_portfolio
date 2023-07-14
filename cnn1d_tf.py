@@ -10,9 +10,15 @@ from scipy import stats
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+import datetime
+import joblib
 
 from lib.preprocess import get_data
 
+
+MODEL_NAME = "cnn1d_tf"
+start_date = datetime.datetime.now()
+print("Start time: ", start_date)
 # Same labels will be reused throughout the program
 LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
 # The number of steps within one time segment
@@ -56,36 +62,20 @@ history = model.fit(
     batch_size=1024,
 )
 
-y_pred = model.predict(x_test)
+joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")
+
+y_pred = model.predict(x_test).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
-# Creates a confusion matrix
-cm = confusion_matrix(y_test, y_pred.argmax(axis=-1))
-
-# Transform to df for easier plotting
-cm_df = pd.DataFrame(cm, index=LABELS, columns=LABELS)
-
-plt.figure(figsize=(10, 10))
-sns.heatmap(
-    cm_df,
-    annot=True,
-    fmt="d",
-    linewidths=0.5,
-    cmap="Blues",
-    cbar=False,
-    annot_kws={"size": 14},
-    square=True,
-)
-plt.title(
-    "Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred.argmax(axis=-1)))
-)
-plt.ylabel("True label")
-plt.xlabel("Predicted label")
-plt.savefig("tf1dcnn_predict.png")
-
-print(classification_report(y_test, y_pred.argmax(axis=-1), target_names=LABELS))
+predict = pd.DataFrame([y_pred,y_test]).T
+predict.columns = ["y_pred", "y_test"]
+predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 
 sample = x_train[3199].reshape(1, TIME_PERIODS, N_FEATURES)
 outputs = [model.layers[i].output for i in range(7)]
 model_view = Model(inputs=model.inputs, outputs=outputs)
 model_view.summary()
+
+end_date = datetime.datetime.now()
+print("End time: ", end_date)
+print("Total time: ", end_date - start_date)

@@ -1,6 +1,7 @@
 import joblib
 import os
 import argparse
+import datetime
 import seaborn as sns
 from matplotlib import pyplot as plt
 import pandas as pd
@@ -8,18 +9,11 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 
 from make_labnotebook import generate_experiment_memo
 
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--path", type=str, default="0711_SAMPLE")
-    args = parser.parse_args()
-    return args
-
-def result_process():
-    args = parse_args()
-    path = os.path.join("../result", args.path, "raw/")
+def result_process(name):
+    name = f"{datetime.datetime.now().strftime('%m%d')}_{name}"
+    path = os.path.join("result", name, "raw/")
     study = joblib.load(os.path.join(path, "study.pkl"))
-    log = 0
+    log = pd.read_csv(os.path.join(path, "experiment.log"), index_col=0)
     y = pd.read_csv(os.path.join(path, "predict.csv"), index_col=0)
     # Creates a confusion matrix
     y_pred = y["predict"]
@@ -44,6 +38,6 @@ def result_process():
     plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
-    plt.savefig(f"results/processed/{args.path}.png")
+    plt.savefig(f"results/{name}/processed/cross-tab.png")
 
     print(classification_report(y_test, y_pred, target_names=LABELS))

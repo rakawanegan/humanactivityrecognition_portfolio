@@ -17,6 +17,7 @@ from lib.preprocess import get_data
 
 
 MODEL_NAME = "optuna_vit1d"
+print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
 

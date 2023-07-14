@@ -24,4 +24,4 @@ def main():
     os.mkdir(f"result/{datetime.datetime.now().strftime('%m%d')}_{args.path}")
     args = parse_args()
     main = run_command(f"python3 {args.path}.py result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/raw/experiment.log")
-    rp()
+    rp(f"{datetime.datetime.now().strftime('%m%d')}_{args.path}")

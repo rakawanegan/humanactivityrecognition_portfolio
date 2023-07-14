@@ -17,6 +17,7 @@ from lib.preprocess import get_data
 
 
 MODEL_NAME = "convbbt"
+print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
 # Same labels will be reused throughout the program
