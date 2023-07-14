@@ -232,5 +232,6 @@ param["STEP_DISTANCE"] = STEP_DISTANCE
 param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
+param["search_space"] = search_space
 
 joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")
