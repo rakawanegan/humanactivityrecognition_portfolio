@@ -72,4 +72,4 @@ def result_process(name):
     content["model size"] = f"{model.__sizeof__()//1e+9} GB"
     content["confusion_matrix"] = "![alt](./cross-tab.png)"
 
-    generate_experiment_memo(f"result/{name}/processed/", param["start_date"], content)
+    generate_experiment_memo(f"result/{name}/processed/", content["start_date"], content)
