@@ -133,6 +133,16 @@ Optunaの探索空間
 - 自己復元タスクなどTransformerに適したタスクで事前学習させてからFine-Turningをする
 
 
+# Usage
 
+python3 run.py --path [py file name]
 
-
+- mkdir "%m%d_[py file name]"
+- run main py file
+> study.pkl  
+> model.pkl  
+> predict.csv  
+> experiment.log  
+- run result_process
+> cross_tab.png  
+> labnotebook.md  

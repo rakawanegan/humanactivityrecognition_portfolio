@@ -1,5 +1,7 @@
 import os
 
+import joblib
+import datetime
 import numpy as np
 import optuna
 import pandas as pd
@@ -13,6 +15,10 @@ from torch.utils.data import DataLoader, TensorDataset
 from lib.model import PreConvTransformer
 from lib.preprocess import get_data
 
+
+MODEL_NAME = "optuna_convbbt"
+start_date = datetime.datetime.now()
+print("Start time: ", start_date)
 # Same labels will be reused throughout the program
 LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
 # The number of steps within one time segment
@@ -129,6 +135,7 @@ def obj(trial):
 study = optuna.create_study(direction="maximize")
 study.optimize(obj, n_trials=1000)
 print(study.best_trial)
+joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
 
 best_params = dict(study.best_params)
 best_params["dim"] = TIME_PERIODS
@@ -177,6 +184,7 @@ for ep in range(1, epochs):
 
 
 model.eval()
+joblib.dump(model, f"result/{start_date.strftime('%m%d')}_optuna{MODEL_NAME}/raw/model.pkl")
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
@@ -188,35 +196,17 @@ for batch in test_loader:
 y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
-# Creates a confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-
-# Transform to df for easier plotting
-cm_df = pd.DataFrame(cm, index=LABELS, columns=LABELS)
-
-plt.figure(figsize=(10, 10))
-sns.heatmap(
-    cm_df,
-    annot=True,
-    fmt="d",
-    linewidths=0.5,
-    cmap="Blues",
-    cbar=False,
-    annot_kws={"size": 14},
-    square=True,
-)
-plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
-plt.ylabel("True label")
-plt.xlabel("Predicted label")
-plt.savefig("results/convbackbone_transformer_optuna.png")
-
-print(classification_report(y_test, y_pred, target_names=LABELS))
+predict = pd.DataFrame([y_pred,y_test], columns=["predict", "true"])
+predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 
 print("Model's state_dict:")
 for param_tensor in model.state_dict():
     print(param_tensor, "\t", model.state_dict()[param_tensor].size())
 
-# Print optimizer's state_dict
-# print("Optimizer's state_dict:")
-# for var_name in optimizer.state_dict():
-#     print(var_name, "\t", optimizer.state_dict()[var_name])
+print("Optimizer's state_dict:")
+for var_name in optimizer.state_dict():
+    print(var_name, "\t", optimizer.state_dict()[var_name])
+
+end_date = datetime.datetime.now()
+print("End time: ", end_date)
+print("Total time: ", end_date - start_date)
