@@ -57,7 +57,7 @@ def result_process(name):
     plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
-    plt.savefig(f"results/{name}/processed/cross-tab.png")
+    plt.savefig(f"result/{name}/processed/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
 
     content = dict()
@@ -72,4 +72,4 @@ def result_process(name):
     content["model size"] = f"{model.__sizeof__()//1e+9} GB"
     content["confusion_matrix"] = "![alt](./cross-tab.png)"
 
-    generate_experiment_memo(f"results/{name}/processed/", param["start_date"], content)
+    generate_experiment_memo(f"result/{name}/processed/", param["start_date"], content)
