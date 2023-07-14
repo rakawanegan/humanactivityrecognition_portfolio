@@ -21,7 +21,13 @@ def parse_args():
 
 
 def main():
-    os.mkdir(f"result/{datetime.datetime.now().strftime('%m%d')}_{args.path}")
     args = parse_args()
-    main = run_command(f"python3 {args.path}.py result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/raw/experiment.log")
+    os.makedirs(f"result/{datetime.datetime.now().strftime('%m%d')}_{args.path}", exist_ok=True)
+    os.makedirs(f"result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/raw", exist_ok=True)
+    os.makedirs(f"result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/processed", exist_ok=True)
+    main = run_command(f"python3 {args.path}.py > result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/raw/experiment.log")
     rp(f"{datetime.datetime.now().strftime('%m%d')}_{args.path}")
+
+
+if __name__ == "__main__":
+    main()

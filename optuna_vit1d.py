@@ -62,23 +62,33 @@ test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).flo
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+search_space = {
+    "patch_size": [1, 2, 5, 8, 10, 16, 40],
+    "dim": [32, 64, 128, 256, 512],
+    "depth": [3, 5, 6, 8],
+    "heads": [3, 5, 6, 8, 10],
+    "mlp_dim": [256, 512, 1024, 2048],
+    "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "batch_size": [32, 64, 128, 256, 512],
+}
 
 def obj(trial):
     params = {
         "seq_len": TIME_PERIODS,
         "num_classes": len(LABELS),
         "channels": N_FEATURES,
-        "patch_size": trial.suggest_categorical("patch_size", [1, 2, 5, 8, 10, 16, 40]),
-        "dim": trial.suggest_categorical("dim", [32, 64, 128, 256, 512]),
-        "depth": trial.suggest_categorical("depth", [3, 5, 6, 8]),
-        "heads": trial.suggest_categorical("heads", [3, 5, 6, 8, 10]),
-        "mlp_dim": trial.suggest_categorical("mlp_dim", [256, 512, 1024, 2048]),
-        "dropout": trial.suggest_categorical("dropout", [0.01, 0.1, 0.25, 0.5, 0.8]),
+        "patch_size": trial.suggest_categorical("patch_size", search_space["patch_size"]),
+        "dim": trial.suggest_categorical("dim", search_space["dim"]),
+        "depth": trial.suggest_categorical("depth", search_space["depth"]),
+        "heads": trial.suggest_categorical("heads", search_space["heads"]),
+        "mlp_dim": trial.suggest_categorical("mlp_dim", search_space["mlp_dim"]),
+        "dropout": trial.suggest_categorical("dropout", search_space["dropout"]),
         "emb_dropout": trial.suggest_categorical(
-            "emb_dropout", [0.01, 0.1, 0.25, 0.5, 0.8]
+            "emb_dropout", search_space["emb_dropout"]
         ),
     }
-    batch_size = trial.suggest_categorical("batch_size", [16, 32, 64, 128, 256, 512])
+    batch_size = trial.suggest_categorical("batch_size", search_space["batch_size"])
 
     train_loader = DataLoader(
         train, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()
@@ -199,5 +209,6 @@ param["STEP_DISTANCE"] = STEP_DISTANCE
 param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
+param["search_space"] = search_space
 
 joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")

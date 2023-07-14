@@ -38,12 +38,15 @@ x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
 
-
-batch_size = 32
+# Hyperparameters
 epochs = 150
+ref_size = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
+print("Device: ", device)
+print("Max Epochs: ", epochs)
+print("Early Stopping Reference Size: ", ref_size)
 
 
 class SeqDataset(TensorDataset):
@@ -74,23 +77,32 @@ def is_worse(losslist, ref_size, axis="minimize"):
     else:
         raise ValueError("Invalid axis value: " + axis)
 
+search_space = {
+    "hidden_ch": [3, 5, 7, 8, 10, 15],
+    "depth": [3, 5, 6, 8],
+    "heads": [3, 5, 6, 8, 10],
+    "mlp_dim": [256, 512, 1024, 2048],
+    "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "batch_size": [16, 32, 64, 128, 256, 512],
+}
+print("Search Space: ", search_space)
 
 def obj(trial):
     params = {
         "num_classes": len(LABELS),
         "dim": TIME_PERIODS,
         "channels": N_FEATURES,
-        "hidden_ch": trial.suggest_categorical("hidden_ch", [3, 5, 7, 8, 10, 15]),
-        "depth": trial.suggest_categorical("depth", [3, 5, 6, 8]),
-        "heads": trial.suggest_categorical("heads", [3, 5, 6, 8, 10]),
-        "mlp_dim": trial.suggest_categorical("mlp_dim", [256, 512, 1024, 2048]),
-        "dropout": trial.suggest_categorical("dropout", [0.01, 0.1, 0.25, 0.5, 0.8]),
+        "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
+        "depth": trial.suggest_categorical("depth", search_space["depth"]),
+        "heads": trial.suggest_categorical("heads", search_space["heads"]),
+        "mlp_dim": trial.suggest_categorical("mlp_dim", search_space["mlp_dim"]),
+        "dropout": trial.suggest_categorical("dropout", search_space["dropout"]),
         "emb_dropout": trial.suggest_categorical(
-            "emb_dropout", [0.01, 0.1, 0.25, 0.5, 0.8]
+            "emb_dropout", search_space["emb_dropout"]
         ),
     }
-    batch_size = trial.suggest_categorical("batch_size", [16, 32, 64, 128, 256, 512])
-    ref_size = trial.suggest_categorical("ref_size", [1, 2, 3, 4, 5, 8])
+    batch_size = trial.suggest_categorical("batch_size", search_space["batch_size"])
     train_loader = DataLoader(
         train, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()
     )
@@ -142,10 +154,7 @@ best_params = dict(study.best_params)
 best_params["dim"] = TIME_PERIODS
 best_params["num_classes"] = len(LABELS)
 best_params["channels"] = N_FEATURES
-
-epochs = 100
 batch_size = best_params.pop("batch_size")
-ref_size = best_params.pop("ref_size")
 
 model = PreConvTransformer(**best_params).to(device)
 
