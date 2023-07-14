@@ -5,10 +5,10 @@
 vit1d
 
 ## Start date
-2023-07-14 14:44:38.765676
+2023-07-14 15:01:19.924128
 
 ## End date
-2023-07-14 14:46:54.676666
+2023-07-14 15:03:35.964468
 
 ## Report
 | precision | recall | f1-score | support |
@@ -36,7 +36,7 @@ vit1d
 
 
 ## Model size
-3.2e-05 MB
+Size: 2992       B
 
 ## Confusion_matrix
 ![alt](./cross-tab.png)
