@@ -12,7 +12,7 @@ def create_experiment_memo(dir, content):
         f.write(content)
 
 def generate_experiment_memo(dir:str, date, experiment_info:dict):
-    memo_content = f"# 実験メモ\n\n## 日付\n{date}\n"
+    memo_content = f"# Lab Notebook\n\n## date\n{date}\n"
 
     for key, value in experiment_info.items():
         memo_content += f"\n## {key}\n{value}\n"
@@ -61,15 +61,15 @@ def result_process(name):
     report = classification_report(y_test, y_pred, target_names=LABELS)
 
     content = dict()
-    content["MODEL NAME"] = param.pop("MODEL_NAME")
-    content["start_date"] = param.pop("start_date")
-    content["end_date"] = param.pop("end_date")
-    content["report"] = report
+    content["Model name"] = param.pop("MODEL_NAME")
+    content["Start date"] = param.pop("start_date")
+    content["End date"] = param.pop("end_date")
+    content["Report"] = report
     if study is not None:
-        content["optuna's param"] = best_trial
-        content["optuna search space"] = param.pop("search_space")
-    content["feature param"] = param
-    content["model size"] = f"{model.__sizeof__()//1e+9} GB"
-    content["confusion_matrix"] = "![alt](./cross-tab.png)"
+        content["Optuna's param"] = best_trial
+        content["Optuna search space"] = param.pop("search_space")
+    content["Feature param"] = param
+    content["Model size"] = f"{model.__sizeof__()/1e+6} MB"
+    content["Confusion_matrix"] = "![alt](./cross-tab.png)"
 
     generate_experiment_memo(f"result/{name}/processed/", content["start_date"], content)
