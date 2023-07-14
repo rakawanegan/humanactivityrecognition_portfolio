@@ -47,7 +47,7 @@ def generate_experiment_memo(dir:str, date, experiment_info:dict):
 
 def result_process(name):
     path = os.path.join("result", name, "raw/")
-    model = joblib.load(os.path.join(path, "model.pkl"))
+    # model = joblib.load(os.path.join(path, "model.pkl"))
     param = joblib.load(os.path.join(path, "param.pkl"))
     if os.path.exists(os.path.join(path, "study.pkl")):
         study = joblib.load(os.path.join(path, "study.pkl"))
@@ -102,7 +102,7 @@ def result_process(name):
             value_str = str(value)
         content["Feature param"] += f'- {key}: {value_str}\n'
 
-    content["Model size"] = run_command('stat cnn1d_tf.py | grep Size').split('\t')[0] + " B"
+    content["Model size"] = run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B"
     content["Confusion_matrix"] = "![alt](./cross-tab.png)"
 
     generate_experiment_memo(f"result/{name}/processed/", content["Start date"], content)
