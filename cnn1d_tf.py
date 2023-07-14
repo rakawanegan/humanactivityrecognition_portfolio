@@ -71,7 +71,7 @@ y_pred = model.predict(x_test).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
 predict = pd.DataFrame([y_pred,y_test]).T
-predict.columns = ["y_pred", "y_test"]
+predict.columns = ["predict", "true"]
 predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 
 sample = x_train[3199].reshape(1, TIME_PERIODS, N_FEATURES)

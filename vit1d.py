@@ -113,7 +113,8 @@ for batch in test_loader:
 y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
-predict = pd.DataFrame([y_pred,y_test], columns=["predict", "true"])
+predict = pd.DataFrame([y_pred,y_test]).T
+predict.columns = ["predict", "true"]
 predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 
 print("Model's state_dict:")
