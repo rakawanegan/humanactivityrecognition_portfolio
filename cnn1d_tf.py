@@ -17,6 +17,7 @@ from lib.preprocess import get_data
 
 
 MODEL_NAME = "cnn1d_tf"
+print(MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
 # Same labels will be reused throughout the program
@@ -54,12 +55,14 @@ model.compile(
     loss="categorical_crossentropy", optimizer="rmsprop", metrics=["accuracy"]
 )
 
+epochs = 150
+batch_size = 1024
 history = model.fit(
     x_train,
     y_train,
     validation_data=(x_test, y_test),
-    epochs=150,
-    batch_size=1024,
+    epochs=epochs,
+    batch_size=batch_size,
 )
 
 joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")
@@ -79,3 +82,16 @@ model_view.summary()
 end_date = datetime.datetime.now()
 print("End time: ", end_date)
 print("Total time: ", end_date - start_date)
+
+param = dict()
+param["MODEL_NAME"] = MODEL_NAME
+param["start_date"] = start_date
+param["end_date"] = end_date
+param["LABELS"] = LABELS
+param["TIME_PERIODS"] = TIME_PERIODS
+param["STEP_DISTANCE"] = STEP_DISTANCE
+param["N_FEATURES"] = N_FEATURES
+param["LABEL"] = LABEL
+param["SEED"] = SEED
+
+joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")

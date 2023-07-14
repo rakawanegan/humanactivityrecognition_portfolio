@@ -153,3 +153,17 @@ for var_name in optimizer.state_dict():
 end_date = datetime.datetime.now()
 print("End time: ", end_date)
 print("Total time: ", end_date - start_date)
+
+
+param = dict()
+param["MODEL_NAME"] = MODEL_NAME
+param["start_date"] = start_date
+param["end_date"] = end_date
+param["LABELS"] = LABELS
+param["TIME_PERIODS"] = TIME_PERIODS
+param["STEP_DISTANCE"] = STEP_DISTANCE
+param["N_FEATURES"] = N_FEATURES
+param["LABEL"] = LABEL
+param["SEED"] = SEED
+
+joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")
