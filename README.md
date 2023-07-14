@@ -1,3 +1,7 @@
+# Data sets
+you can download here  
+https://www.cis.fordham.edu/wisdm/dataset.php
+
 # Usage
 ```python3
 python3 run.py --path [py file name]  

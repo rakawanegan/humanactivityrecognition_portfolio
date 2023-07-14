@@ -84,7 +84,14 @@ def result_process(name):
     if study is not None:
         content["Optuna's param"] = best_trial
         content["Optuna search space"] = param.pop("search_space")
-    content["Feature param"] = param
+    content["Feature param"] = ""
+    for key, value in param.items():
+        if isinstance(value, list):
+            value_str = ', '.join(value)
+        else:
+            value_str = str(value)
+        content["Feature param"] += f'- {key}: {value_str}\n'
+
     content["Model size"] = f"{model.__sizeof__()/1e+6} MB"
     content["Confusion_matrix"] = "![alt](./cross-tab.png)"
 
