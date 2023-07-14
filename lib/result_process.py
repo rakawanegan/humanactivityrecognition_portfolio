@@ -4,6 +4,16 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import subprocess
+
+
+def run_command(command):
+    try:
+        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        print(f"Command execution failed with error: {e.stderr}")
+        return None
 
 def convert_to_markdown_table(input_string):
     lines = input_string.strip().split('\n')
@@ -92,7 +102,7 @@ def result_process(name):
             value_str = str(value)
         content["Feature param"] += f'- {key}: {value_str}\n'
 
-    content["Model size"] = f"{model.__sizeof__()/1e+6} MB"
+    content["Model size"] = run_command('stat cnn1d_tf.py | grep Size').split('\t')[0] + " B"
     content["Confusion_matrix"] = "![alt](./cross-tab.png)"
 
     generate_experiment_memo(f"result/{name}/processed/", content["Start date"], content)
