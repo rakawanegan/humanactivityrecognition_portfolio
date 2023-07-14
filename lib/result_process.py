@@ -31,7 +31,7 @@ def result_process(name):
         study = None
         best_trial = None
         search_space = None
-    log = pd.read_csv(os.path.join(path, "experiment.log"), index_col=0)
+    # log = pd.read_csv(os.path.join(path, "experiment.log"), index_col=0)
     y = pd.read_csv(os.path.join(path, "predict.csv"), index_col=0)
 
     # Creates a confusion matrix
