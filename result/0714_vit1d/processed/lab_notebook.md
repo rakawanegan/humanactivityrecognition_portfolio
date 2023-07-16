@@ -10,6 +10,9 @@ vit1d
 ## End date
 2023-07-14 15:03:35.964468
 
+## Execution time
+0 hours 2 minutes 16 seconds
+
 ## Report
 | precision | recall | f1-score | support |
 | --- | --- | --- | --- |
@@ -26,6 +29,9 @@ vit1d
 | weighted | avg | 0.89 | 0.89 | 0.89 | 9060 |
 
 
+## Optuna search space
+None
+
 ## Feature param
 - LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
 - TIME_PERIODS: 80
@@ -34,9 +40,8 @@ vit1d
 - LABEL: ActivityEncoded
 - SEED: 314
 
-
 ## Model size
-Size: 2992       B
+Size: 151409920  B
 
 ## Confusion_matrix
 ![alt](./cross-tab.png)

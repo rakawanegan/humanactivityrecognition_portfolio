@@ -10,6 +10,9 @@ optuna_vit1d
 ## End date
 2023-07-15 00:29:36.540358
 
+## Execution time
+9 hours 21 minutes 28 seconds
+
 ## Report
 | precision | recall | f1-score | support |
 | --- | --- | --- | --- |
@@ -26,11 +29,15 @@ optuna_vit1d
 | weighted | avg | 0.90 | 0.90 | 0.90 | 9060 |
 
 
-## Optuna's param
-FrozenTrial(number=990, state=TrialState.COMPLETE, values=[0.9046698943661972], datetime_start=datetime.datetime(2023, 7, 15, 0, 22, 22, 704605), datetime_complete=datetime.datetime(2023, 7, 15, 0, 22, 55, 998568), params={'patch_size': 10, 'dim': 64, 'depth': 8, 'heads': 10, 'mlp_dim': 256, 'dropout': 0.1, 'emb_dropout': 0.01, 'batch_size': 128}, user_attrs={}, system_attrs={}, intermediate_values={}, distributions={'patch_size': CategoricalDistribution(choices=(1, 2, 5, 8, 10, 16, 40)), 'dim': CategoricalDistribution(choices=(32, 64, 128, 256, 512)), 'depth': CategoricalDistribution(choices=(3, 5, 6, 8)), 'heads': CategoricalDistribution(choices=(3, 5, 6, 8, 10)), 'mlp_dim': CategoricalDistribution(choices=(256, 512, 1024, 2048)), 'dropout': CategoricalDistribution(choices=(0.01, 0.1, 0.25, 0.5, 0.8)), 'emb_dropout': CategoricalDistribution(choices=(0.01, 0.1, 0.25, 0.5, 0.8)), 'batch_size': CategoricalDistribution(choices=(32, 64, 128, 256, 512))}, trial_id=990, value=None)
-
 ## Optuna search space
-{'patch_size': [1, 2, 5, 8, 10, 16, 40], 'dim': [32, 64, 128, 256, 512], 'depth': [3, 5, 6, 8], 'heads': [3, 5, 6, 8, 10], 'mlp_dim': [256, 512, 1024, 2048], 'dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'emb_dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'batch_size': [32, 64, 128, 256, 512]}
+- patch_size: [, 1, ,,  , 2, ,,  , 5, ,,  , 8, ,,  , 1, 0, ,,  , 1, 6, ,,  , 4, 0, ]
+- dim: [, 3, 2, ,,  , 6, 4, ,,  , 1, 2, 8, ,,  , 2, 5, 6, ,,  , 5, 1, 2, ]
+- depth: [, 3, ,,  , 5, ,,  , 6, ,,  , 8, ]
+- heads: [, 3, ,,  , 5, ,,  , 6, ,,  , 8, ,,  , 1, 0, ]
+- mlp_dim: [, 2, 5, 6, ,,  , 5, 1, 2, ,,  , 1, 0, 2, 4, ,,  , 2, 0, 4, 8, ]
+- dropout: [, 0, ., 0, 1, ,,  , 0, ., 1, ,,  , 0, ., 2, 5, ,,  , 0, ., 5, ,,  , 0, ., 8, ]
+- emb_dropout: [, 0, ., 0, 1, ,,  , 0, ., 1, ,,  , 0, ., 2, 5, ,,  , 0, ., 5, ,,  , 0, ., 8, ]
+- batch_size: [, 3, 2, ,,  , 6, 4, ,,  , 1, 2, 8, ,,  , 2, 5, 6, ,,  , 5, 1, 2, ]
 
 ## Feature param
 - LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
@@ -39,7 +46,7 @@ FrozenTrial(number=990, state=TrialState.COMPLETE, values=[0.9046698943661972], 
 - N_FEATURES: 3
 - LABEL: ActivityEncoded
 - SEED: 314
-
+- search_space: {'patch_size': [1, 2, 5, 8, 10, 16, 40], 'dim': [32, 64, 128, 256, 512], 'depth': [3, 5, 6, 8], 'heads': [3, 5, 6, 8, 10], 'mlp_dim': [256, 512, 1024, 2048], 'dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'emb_dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'batch_size': [32, 64, 128, 256, 512]}
 
 ## Model size
 Size: 6373621    B
