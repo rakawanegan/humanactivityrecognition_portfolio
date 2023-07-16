@@ -10,7 +10,7 @@ https://www.cis.fordham.edu/wisdm/dataset.php
 
 ![alt](./assets/axes-of-motion.png)
 
-in their front pants leg pocket.  
+device in their front pants leg pocket.  
 x is perpendicular to the direction of travel  
 y is perpendicular to the thigh  
 z is the direction of travel  
