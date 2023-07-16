@@ -26,7 +26,8 @@ def convert_to_markdown_table(input_string):
 
     # Generate the table rows
     for row in data:
-        table += '| | ' + ' | '.join(row.replace("| accuracy |", "| accuracy |||")) + ' |\n'
+        row = list(map(lambda x: x.replace("| accuracy |", "| accuracy |||"), row))
+        table += '| | ' + ' | '.join(row) + ' |\n'
 
     return table
 
