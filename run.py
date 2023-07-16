@@ -26,7 +26,8 @@ def main():
     os.makedirs(f"result/{date}_{args.path}")
     os.makedirs(f"result/{date}_{args.path}/raw", exist_ok=True)
     os.makedirs(f"result/{date}_{args.path}/processed", exist_ok=True)
-    cp = run_command(f"cp {args.path}.py result/{date}_{args.path}/raw/")
+    cp_lib = run_command(f"cp -r lib/ result/{date}_{args.path}/raw/")
+    cp_main = run_command(f"cp {args.path}.py result/{date}_{args.path}/raw/")
     main = run_command(f"python3 {args.path}.py > result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/raw/experiment.log")
     rp(f"{date}_{args.path}")
 
