@@ -50,8 +50,8 @@ def result_process(name):
     # model = joblib.load(os.path.join(path, "model.pkl"))
     param = joblib.load(os.path.join(path, "param.pkl"))
     study = joblib.load(os.path.join(path, "study.pkl")) if os.path.exists(os.path.join(path, "study.pkl")) else None
-    best_trial = study.best_trial if study is not None else None
-    search_space = param["search_space"] if study is not None else None
+    # best_trial = study.best_trial if study is not None else None
+    search_space = param.pop("search_space") if study is not None else None
     # log = pd.read_csv(os.path.join(path, "experiment.log"), index_col=0)
     y = pd.read_csv(os.path.join(path, "predict.csv"), index_col=0)
 
@@ -89,7 +89,7 @@ def result_process(name):
         "Execution time": execution_time,
         "Report": convert_to_markdown_table(report),
         "Optuna search space": '\n'.join([f'- {key}: {", ".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if study is not None else None,
-        "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
+        "Feature param": '\n'.join([f'- {key}: {"".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
         "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
         "Confusion_matrix": "![alt](./cross-tab.png)"
     }
