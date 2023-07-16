@@ -40,13 +40,12 @@ optuna_vit1d
 - batch_size: [, 3, 2, ,,  , 6, 4, ,,  , 1, 2, 8, ,,  , 2, 5, 6, ,,  , 5, 1, 2, ]
 
 ## Feature param
-- LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
+- LABELS: DownstairsJoggingSittingStandingUpstairsWalking
 - TIME_PERIODS: 80
 - STEP_DISTANCE: 40
 - N_FEATURES: 3
 - LABEL: ActivityEncoded
 - SEED: 314
-- search_space: {'patch_size': [1, 2, 5, 8, 10, 16, 40], 'dim': [32, 64, 128, 256, 512], 'depth': [3, 5, 6, 8], 'heads': [3, 5, 6, 8, 10], 'mlp_dim': [256, 512, 1024, 2048], 'dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'emb_dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'batch_size': [32, 64, 128, 256, 512]}
 
 ## Model size
 Size: 6373621    B

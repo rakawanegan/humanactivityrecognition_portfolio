@@ -33,7 +33,7 @@ vit1d
 None
 
 ## Feature param
-- LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
+- LABELS: DownstairsJoggingSittingStandingUpstairsWalking
 - TIME_PERIODS: 80
 - STEP_DISTANCE: 40
 - N_FEATURES: 3
