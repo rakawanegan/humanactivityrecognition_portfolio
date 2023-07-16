@@ -15,7 +15,7 @@ vit1d
 
 ## Report
 | | precision | recall | f1-score | support |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 |  |
 | Downstairs | 0.65 | 0.67 | 0.66 | 824 |
 | Jogging | 0.94 | 0.96 | 0.95 | 2832 |

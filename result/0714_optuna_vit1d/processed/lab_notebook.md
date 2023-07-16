@@ -15,7 +15,7 @@ optuna_vit1d
 
 ## Report
 | | precision | recall | f1-score | support |
-| --- | --- | --- | --- |
+| --- | --- | --- | --- | --- |
 |  |
 | Downstairs | 0.69 | 0.68 | 0.69 | 824 |
 | Jogging | 0.94 | 0.97 | 0.96 | 2832 |
