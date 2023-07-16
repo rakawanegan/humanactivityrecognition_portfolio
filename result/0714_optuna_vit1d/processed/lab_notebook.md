@@ -30,17 +30,17 @@ optuna_vit1d
 
 
 ## Optuna search space
-- patch_size: [, 1, ,,  , 2, ,,  , 5, ,,  , 8, ,,  , 1, 0, ,,  , 1, 6, ,,  , 4, 0, ]
-- dim: [, 3, 2, ,,  , 6, 4, ,,  , 1, 2, 8, ,,  , 2, 5, 6, ,,  , 5, 1, 2, ]
-- depth: [, 3, ,,  , 5, ,,  , 6, ,,  , 8, ]
-- heads: [, 3, ,,  , 5, ,,  , 6, ,,  , 8, ,,  , 1, 0, ]
-- mlp_dim: [, 2, 5, 6, ,,  , 5, 1, 2, ,,  , 1, 0, 2, 4, ,,  , 2, 0, 4, 8, ]
-- dropout: [, 0, ., 0, 1, ,,  , 0, ., 1, ,,  , 0, ., 2, 5, ,,  , 0, ., 5, ,,  , 0, ., 8, ]
-- emb_dropout: [, 0, ., 0, 1, ,,  , 0, ., 1, ,,  , 0, ., 2, 5, ,,  , 0, ., 5, ,,  , 0, ., 8, ]
-- batch_size: [, 3, 2, ,,  , 6, 4, ,,  , 1, 2, 8, ,,  , 2, 5, 6, ,,  , 5, 1, 2, ]
+- patch_size: [1, 2, 5, 8, 10, 16, 40]
+- dim: [32, 64, 128, 256, 512]
+- depth: [3, 5, 6, 8]
+- heads: [3, 5, 6, 8, 10]
+- mlp_dim: [256, 512, 1024, 2048]
+- dropout: [0.01, 0.1, 0.25, 0.5, 0.8]
+- emb_dropout: [0.01, 0.1, 0.25, 0.5, 0.8]
+- batch_size: [32, 64, 128, 256, 512]
 
 ## Feature param
-- LABELS: DownstairsJoggingSittingStandingUpstairsWalking
+- LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
 - TIME_PERIODS: 80
 - STEP_DISTANCE: 40
 - N_FEATURES: 3
