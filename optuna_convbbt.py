@@ -83,6 +83,7 @@ search_space = {
     "hidden_ch": [3, 5, 7, 8, 10, 15],
     "depth": [3, 5, 6, 8],
     "heads": [3, 5, 6, 8, 10],
+    "hidden_dim": [64, 128, 256, 512, 1024],
     "mlp_dim": [256, 512, 1024, 2048],
     "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
     "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
@@ -93,8 +94,9 @@ print("Search Space: ", search_space)
 def obj(trial):
     params = {
         "num_classes": len(LABELS),
-        "dim": TIME_PERIODS,
+        "input_dim": TIME_PERIODS,
         "channels": N_FEATURES,
+        "hidden_dim": trial.suggest_categorical("hidden_dim", search_space["hidden_dim"]),
         "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
         "depth": trial.suggest_categorical("depth", search_space["depth"]),
         "heads": trial.suggest_categorical("heads", search_space["heads"]),
@@ -113,7 +115,6 @@ def obj(trial):
     model = PreConvTransformer(**params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.CrossEntropyLoss()
-    axis = "minimize"
     losslist = list()
     for epoch in range(MAX_EPOCH):
         for inputs, labels in train_loader:
@@ -158,7 +159,7 @@ print(study.best_trial)
 joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
 
 best_params = dict(study.best_params)
-best_params["dim"] = TIME_PERIODS
+best_params["input_dim"] = TIME_PERIODS
 best_params["num_classes"] = len(LABELS)
 best_params["channels"] = N_FEATURES
 

@@ -156,7 +156,8 @@ class PreConvTransformer(nn.Module):
         *,
         hidden_ch,
         num_classes,
-        dim,
+        input_dim,
+        hidden_dim,
         depth,
         heads,
         mlp_dim,
@@ -167,15 +168,17 @@ class PreConvTransformer(nn.Module):
     ):
         super().__init__()
         self.convbackbone = ConvBackbone(input_ch=channels, transformer_ch=hidden_ch)
-        self.pos_embedding = nn.Parameter(torch.randn(1, hidden_ch + 1, dim))
-        self.cls_token = nn.Parameter(torch.randn(dim))
+        self.to_embedding = nn.Linear(input_dim, hidden_dim, bias=False)
+        self.pos_embedding = nn.Parameter(torch.randn(1, hidden_ch + 1, hidden_dim))
+        self.cls_token = nn.Parameter(torch.randn(hidden_dim))
         self.dropout = nn.Dropout(emb_dropout)
-        self.transformer = Transformer(dim, depth, heads, dim_head, mlp_dim, dropout)
-        self.mlp_head = nn.Sequential(nn.LayerNorm(dim), nn.Linear(dim, num_classes))
+        self.transformer = Transformer(hidden_dim, depth, heads, dim_head, mlp_dim, dropout)
+        self.mlp_head = nn.Sequential(nn.LayerNorm(hidden_dim), nn.Linear(hidden_dim, num_classes))
 
     def forward(self, series):
         series = series.permute(0, 2, 1)
         x = self.convbackbone(series)
+        x = self.to_embedding(x)
         b, n, _ = x.shape
         cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
         x, ps = pack([cls_tokens, x], "b * d")
