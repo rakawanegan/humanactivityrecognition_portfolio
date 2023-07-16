@@ -16,17 +16,17 @@ optuna_vit1d
 ## Report
 | | precision | recall | f1-score | support |
 | --- | --- | --- | --- | --- |
-| |  |
-| | Downstairs | 0.69 | 0.68 | 0.69 | 824 |
-| | Jogging | 0.94 | 0.97 | 0.96 | 2832 |
-| | Sitting | 0.98 | 0.85 | 0.91 | 501 |
-| | Standing | 0.85 | 0.95 | 0.90 | 410 |
-| | Upstairs | 0.78 | 0.67 | 0.72 | 1025 |
-| | Walking | 0.94 | 0.96 | 0.95 | 3468 |
-| |  |
-| | accuracy | 0.90 | 9060 |
-| | macro | avg | 0.86 | 0.85 | 0.85 | 9060 |
-| | weighted | avg | 0.90 | 0.90 | 0.90 | 9060 |
+|  |
+| Downstairs | 0.69 | 0.68 | 0.69 | 824 |
+| Jogging | 0.94 | 0.97 | 0.96 | 2832 |
+| Sitting | 0.98 | 0.85 | 0.91 | 501 |
+| Standing | 0.85 | 0.95 | 0.90 | 410 |
+| Upstairs | 0.78 | 0.67 | 0.72 | 1025 |
+| Walking | 0.94 | 0.96 | 0.95 | 3468 |
+|  |
+|  accuracy || | 0.90 | 9060 |
+| macro | avg | 0.86 | 0.85 | 0.85 | 9060 |
+| weighted | avg | 0.90 | 0.90 | 0.90 | 9060 |
 
 
 ## Optuna search space
