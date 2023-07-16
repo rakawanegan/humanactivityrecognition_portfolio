@@ -43,6 +43,45 @@ python3 run.py --path [py file name]
 > cross_tab.png: using labnotebook picture  
 > labnotebook.md: experiment description  
 
+# Tree
+
+<pre>
+.
+├── README.md: this file
+├── assets: image folder
+├── cnn1d_tf.py: main file(1d-cnn)
+├── convbbt.py: main file(conv.backbone transformer)
+├── optuna_convbbt.py: main file(conv.backbone transformer with optuna)
+├── vit1d.py: main file(1d-vision transformer)
+├── optuna_vit1d.py: main file(1d-vision transformer with optuna)
+├── data: WISDM dataset
+│   ├── readme.txt
+│   ├── WISDM_ar_v1.1.csv
+│   ├── WISDM_ar_v1.1_raw_about.txt
+│   └── WISDM_ar_v1.1_raw.txt
+├── lib: local modules
+│   ├── model.py
+│   ├── preprocess.py
+│   └── result_process.py
+├── processor
+│   ├── data_format.py: convert raw.txt to csv
+│   └── format.py: format py file
+├── result
+│   └── MMDD_main
+│       ├── processed
+│       │   ├── cross-tab.png
+│       │   └── lab_notebook.md # result of experiment
+│       └── raw
+│           ├── main.py
+│           ├── experiment.log
+│           ├── lib
+│           │   ├── model.py
+│           │   ├── preprocess.py
+│           │   └── result_process.py
+│           ├── param.pkl
+│           └── predict.csv
+└── run.py: run script
+</pre>
 
 # MIT License
 
