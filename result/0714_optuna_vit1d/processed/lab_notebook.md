@@ -14,7 +14,7 @@ optuna_vit1d
 9 hours 21 minutes 28 seconds
 
 ## Report
-| precision | recall | f1-score | support |
+| | precision | recall | f1-score | support |
 | --- | --- | --- | --- |
 |  |
 | Downstairs | 0.69 | 0.68 | 0.69 | 824 |

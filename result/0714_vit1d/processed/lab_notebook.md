@@ -14,7 +14,7 @@ vit1d
 0 hours 2 minutes 16 seconds
 
 ## Report
-| precision | recall | f1-score | support |
+| | precision | recall | f1-score | support |
 | --- | --- | --- | --- |
 |  |
 | Downstairs | 0.65 | 0.67 | 0.66 | 824 |
