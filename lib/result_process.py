@@ -22,12 +22,12 @@ def convert_to_markdown_table(input_string):
 
     # Generate the table header
     table = '| | ' + ' | '.join(headers) + ' |\n'
-    table += '| ' + ' | '.join(['---'] * len(headers)) + ' |\n'
+    table += '| ' + ' | '.join(['---'] * (len(headers) + 1)) + ' |\n'
 
     # Generate the table rows
     for row in data:
         if len(row) == len(headers):
-            table += '| | ' + ' | '.join(row) + ' |\n'
+            table += '| | ' + ' | '.join(row.replace("| accuracy |", "| accuracy |||")) + ' |\n'
         else:
             table += '| ' + ' | '.join(row) + ' |\n'
 
