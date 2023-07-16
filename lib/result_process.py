@@ -80,16 +80,15 @@ def result_process(name):
     plt.xlabel("Predicted label")
     plt.savefig(f"result/{name}/processed/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
-    time_diff = param["end_date"] - param["start_date"]
-    execution_time = f"{int(time_diff / 3600)} hours {int((time_diff % 3600) / 60)} minutes {int(time_diff % 60)} seconds"
+    time_diff = (param["end_date"] - param["start_date"]).total_seconds()
+    execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
     content = {
         "Model name": param.pop("MODEL_NAME"),
         "Start date": param.pop("start_date"),
         "End date": param.pop("end_date"),
         "Execution time": execution_time,
         "Report": convert_to_markdown_table(report),
-        "Optuna's param": best_trial if study is not None else None,
-        "Optuna search space": search_space if study is not None else None,
+        "Optuna search space": '\n'.join([f'- {key}: {", ".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if study is not None else None,
         "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
         "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
         "Confusion_matrix": "![alt](./cross-tab.png)"
