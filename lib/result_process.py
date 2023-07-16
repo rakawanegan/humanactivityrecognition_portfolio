@@ -49,14 +49,9 @@ def result_process(name):
     path = os.path.join("result", name, "raw/")
     # model = joblib.load(os.path.join(path, "model.pkl"))
     param = joblib.load(os.path.join(path, "param.pkl"))
-    if os.path.exists(os.path.join(path, "study.pkl")):
-        study = joblib.load(os.path.join(path, "study.pkl"))
-        best_trial = study.best_trial
-        search_space = param["search_space"]
-    else:
-        study = None
-        best_trial = None
-        search_space = None
+    study = joblib.load(os.path.join(path, "study.pkl")) if os.path.exists(os.path.join(path, "study.pkl")) else None
+    best_trial = study.best_trial if study is not None else None
+    search_space = param["search_space"] if study is not None else None
     # log = pd.read_csv(os.path.join(path, "experiment.log"), index_col=0)
     y = pd.read_csv(os.path.join(path, "predict.csv"), index_col=0)
 
@@ -85,24 +80,19 @@ def result_process(name):
     plt.xlabel("Predicted label")
     plt.savefig(f"result/{name}/processed/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
-
-    content = dict()
-    content["Model name"] = param.pop("MODEL_NAME")
-    content["Start date"] = param.pop("start_date")
-    content["End date"] = param.pop("end_date")
-    content["Report"] = convert_to_markdown_table(report)
-    if study is not None:
-        content["Optuna's param"] = best_trial
-        content["Optuna search space"] = param.pop("search_space")
-    content["Feature param"] = ""
-    for key, value in param.items():
-        if isinstance(value, list):
-            value_str = ', '.join(value)
-        else:
-            value_str = str(value)
-        content["Feature param"] += f'- {key}: {value_str}\n'
-
-    content["Model size"] = run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B"
-    content["Confusion_matrix"] = "![alt](./cross-tab.png)"
+    time_diff = param["end_date"] - param["start_date"]
+    execution_time = f"{int(time_diff / 3600)} hours {int((time_diff % 3600) / 60)} minutes {int(time_diff % 60)} seconds"
+    content = {
+        "Model name": param.pop("MODEL_NAME"),
+        "Start date": param.pop("start_date"),
+        "End date": param.pop("end_date"),
+        "Execution time": execution_time,
+        "Report": convert_to_markdown_table(report),
+        "Optuna's param": best_trial if study is not None else None,
+        "Optuna search space": search_space if study is not None else None,
+        "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
+        "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
+        "Confusion_matrix": "![alt](./cross-tab.png)"
+    }
 
     generate_experiment_memo(f"result/{name}/processed/", content["Start date"], content)
