@@ -30,6 +30,8 @@ def main():
     print(isort)
     black = run_command("black ../*.py")
     print(black)
+    git = run_command(f"git add ../.;git commit -m {args.m};git push origin {args.to}")
+    print(git)
 
 
 if __name__ == "__main__":

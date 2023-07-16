@@ -1,7 +1,7 @@
-import os
 import copy
-
 import datetime
+import os
+
 import joblib
 import numpy as np
 import pandas as pd
@@ -11,7 +11,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from lib.model import ViT
 from lib.preprocess import get_data
-
 
 MODEL_NAME = "vit1d"
 print("MODEL_NAME: ", MODEL_NAME)
@@ -35,6 +34,7 @@ x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
 
+
 def is_worse(losslist, REF_SIZE, axis="minimize"):
     if axis == "minimize":
         return all(
@@ -46,6 +46,7 @@ def is_worse(losslist, REF_SIZE, axis="minimize"):
         )
     else:
         raise ValueError("Invalid axis value: " + axis)
+
 
 # Hyperparameters
 MAX_EPOCH = 200
@@ -99,7 +100,7 @@ test_loader = DataLoader(
 loss_list = list()
 p_models = list()
 
-for ep in range(1, MAX_EPOCH+1):
+for ep in range(1, MAX_EPOCH + 1):
     losses = list()
     for batch in train_loader:
         x, t = batch
@@ -137,7 +138,7 @@ for batch in test_loader:
 y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
-predict = pd.DataFrame([y_pred,y_test]).T
+predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
 predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 

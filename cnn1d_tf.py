@@ -1,3 +1,6 @@
+import datetime
+
+import joblib
 import keras
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -10,11 +13,8 @@ from scipy import stats
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import datetime
-import joblib
 
 from lib.preprocess import get_data
-
 
 MODEL_NAME = "cnn1d_tf"
 print(MODEL_NAME)
@@ -70,7 +70,7 @@ joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model
 y_pred = model.predict(x_test).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
-predict = pd.DataFrame([y_pred,y_test]).T
+predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
 predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 

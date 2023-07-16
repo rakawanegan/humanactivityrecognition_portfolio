@@ -1,8 +1,8 @@
-import os
 import copy
+import datetime
+import os
 
 import joblib
-import datetime
 import numpy as np
 import optuna
 import pandas as pd
@@ -15,7 +15,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from lib.model import PreConvTransformer
 from lib.preprocess import get_data
-
 
 MODEL_NAME = "optuna_convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
@@ -79,6 +78,7 @@ def is_worse(losslist, REF_SIZE, axis="minimize"):
     else:
         raise ValueError("Invalid axis value: " + axis)
 
+
 search_space = {
     "hidden_ch": [3, 5, 7, 8, 10, 15],
     "depth": [3, 5, 6, 8],
@@ -91,12 +91,15 @@ search_space = {
 }
 print("Search Space: ", search_space)
 
+
 def obj(trial):
     params = {
         "num_classes": len(LABELS),
         "input_dim": TIME_PERIODS,
         "channels": N_FEATURES,
-        "hidden_dim": trial.suggest_categorical("hidden_dim", search_space["hidden_dim"]),
+        "hidden_dim": trial.suggest_categorical(
+            "hidden_dim", search_space["hidden_dim"]
+        ),
         "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
         "depth": trial.suggest_categorical("depth", search_space["depth"]),
         "heads": trial.suggest_categorical("heads", search_space["heads"]),
@@ -207,7 +210,9 @@ for ep in range(1, MAX_EPOCH + 1):
 
 
 model.eval()
-joblib.dump(model, f"result/{start_date.strftime('%m%d')}_optuna{MODEL_NAME}/raw/model.pkl")
+joblib.dump(
+    model, f"result/{start_date.strftime('%m%d')}_optuna{MODEL_NAME}/raw/model.pkl"
+)
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
@@ -219,7 +224,7 @@ for batch in test_loader:
 y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
-predict = pd.DataFrame([y_pred,y_test]).T
+predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
 predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
 
