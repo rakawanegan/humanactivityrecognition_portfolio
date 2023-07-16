@@ -1,4 +1,5 @@
 import os
+import copy
 
 import datetime
 import joblib
@@ -34,12 +35,28 @@ x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
 
+def is_worse(losslist, REF_SIZE, axis="minimize"):
+    if axis == "minimize":
+        return all(
+            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
+        )
+    elif axis == "maximize":
+        return all(
+            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
+        )
+    else:
+        raise ValueError("Invalid axis value: " + axis)
 
-batch_size = 32
-epochs = 150
+# Hyperparameters
+MAX_EPOCH = 200
+BATCH_SIZE = 128
+REF_SIZE = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
+print("Device: ", device)
+print("Max Epochs: ", MAX_EPOCH)
+print("Early Stopping Reference Size: ", REF_SIZE)
 
 model = ViT(
     seq_len=x_train.shape[1],
@@ -53,6 +70,8 @@ model = ViT(
     emb_dropout=0.1,
 ).to(device)
 
+REF_SIZE = 5
+losslist = list()
 loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
@@ -72,14 +91,15 @@ class SeqDataset(TensorDataset):
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 train_loader = DataLoader(
-    train, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()
+    train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
-    test, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count()
+    test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
-loss_list = [np.inf]
+loss_list = list()
+p_models = list()
 
-for ep in range(1, epochs):
+for ep in range(1, MAX_EPOCH+1):
     losses = list()
     for batch in train_loader:
         x, t = batch
@@ -93,9 +113,13 @@ for ep in range(1, epochs):
         optimizer.step()
         losses.append(loss.item())
     ls = np.mean(losses)
-    if loss_list[-1] < ls:
+    p_models.append(copy.deepcopy(model))
+    if ep > REF_SIZE and is_worse(losslist, REF_SIZE, "minimize"):
         print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+        model = p_models[-REF_SIZE]
         break
+    if ep > REF_SIZE:
+        del p_models[0]  # del oldest model
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     loss_list.append(ls)
 
@@ -139,5 +163,7 @@ param["STEP_DISTANCE"] = STEP_DISTANCE
 param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
+param["MAX_EPOCH"] = MAX_EPOCH
+param["BATCH_SIZE"] = BATCH_SIZE
 
 joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")

@@ -38,13 +38,17 @@ x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
 
-
-batch_size = 64
-epochs = 150
-ref_size = 3
+# Hyperparameters
+MAX_EPOCH = 200
+BATCH_SIZE = 128
+REF_SIZE = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
+print("Device: ", device)
+print("Max Epochs: ", MAX_EPOCH)
+print("Early Stopping Reference Size: ", REF_SIZE)
+
 pct_params = {
     "hidden_ch": 15,
     "num_classes": len(LABELS),
@@ -78,21 +82,21 @@ class SeqDataset(TensorDataset):
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 train_loader = DataLoader(
-    train, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()
+    train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
-    test, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count()
+    test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
 
 
-def is_worse(losslist, ref_size, axis="minimize"):
+def is_worse(losslist, REF_SIZE, axis="minimize"):
     if axis == "minimize":
         return all(
-            x > y for x, y in zip(losslist[-ref_size:], losslist[-ref_size - 1 : -1])
+            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
         )
     elif axis == "maximize":
         return all(
-            x < y for x, y in zip(losslist[-ref_size:], losslist[-ref_size - 1 : -1])
+            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
         )
     else:
         raise ValueError("Invalid axis value: " + axis)
@@ -101,7 +105,7 @@ def is_worse(losslist, ref_size, axis="minimize"):
 losslist = list()
 p_models = list()
 
-for ep in range(1, epochs):
+for ep in range(1, MAX_EPOCH+1):
     losses = list()
     for batch in train_loader:
         x, t = batch
@@ -116,11 +120,11 @@ for ep in range(1, epochs):
         losses.append(loss.item())
     ls = np.mean(losses)
     p_models.append(copy.deepcopy(model))
-    if ep > ref_size and is_worse(losslist, ref_size, "minimize"):
+    if ep > REF_SIZE and is_worse(losslist, REF_SIZE, "minimize"):
         print(f"early stopping at epoch {ep} with loss {ls:.5f}")
         model = p_models[0]
         break
-    if ep > ref_size:
+    if ep > REF_SIZE:
         del p_models[0]  # del oldest model
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     losslist.append(ls)

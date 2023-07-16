@@ -1,4 +1,5 @@
 import os
+import copy
 
 import joblib
 import datetime
@@ -39,14 +40,15 @@ x_train, x_test, y_train, y_test = get_data(
 )
 
 # Hyperparameters
-epochs = 150
-ref_size = 5
+MAX_EPOCH = 200
+BATCH_SIZE = 128
+REF_SIZE = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
 print("Device: ", device)
-print("Max Epochs: ", epochs)
-print("Early Stopping Reference Size: ", ref_size)
+print("Max Epochs: ", MAX_EPOCH)
+print("Early Stopping Reference Size: ", REF_SIZE)
 
 
 class SeqDataset(TensorDataset):
@@ -65,14 +67,14 @@ train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
 
-def is_worse(losslist, ref_size, axis="minimize"):
+def is_worse(losslist, REF_SIZE, axis="minimize"):
     if axis == "minimize":
         return all(
-            x > y for x, y in zip(losslist[-ref_size:], losslist[-ref_size - 1 : -1])
+            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
         )
     elif axis == "maximize":
         return all(
-            x < y for x, y in zip(losslist[-ref_size:], losslist[-ref_size - 1 : -1])
+            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
         )
     else:
         raise ValueError("Invalid axis value: " + axis)
@@ -102,19 +104,18 @@ def obj(trial):
             "emb_dropout", search_space["emb_dropout"]
         ),
     }
-    batch_size = trial.suggest_categorical("batch_size", search_space["batch_size"])
     train_loader = DataLoader(
-        train, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()
+        train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
     )
     test_loader = DataLoader(
-        test, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count()
+        test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
     )
     model = PreConvTransformer(**params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.CrossEntropyLoss()
     axis = "minimize"
-    losslist = [np.inf] * ref_size if axis == "minimize" else [-np.inf] * ref_size
-    for epoch in range(100):
+    losslist = list()
+    for epoch in range(MAX_EPOCH):
         for inputs, labels in train_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -124,9 +125,15 @@ def obj(trial):
             loss.backward()
             optimizer.step()
             losslist.append(loss.item())
-            # p_model save
-        if is_worse(losslist, ref_size, "minimize"):
+        ls = np.mean(losses)
+        losslist.append(ls)
+        p_models.append(copy.deepcopy(model))
+        if ep > REF_SIZE and is_worse(losslist, REF_SIZE, "minimize"):
+            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+            model = p_models[-REF_SIZE]
             break
+        if ep > REF_SIZE:
+            del p_models[0]  # del oldest model
     model.eval()
     accuracies = list()
     with torch.no_grad():
@@ -154,7 +161,7 @@ best_params = dict(study.best_params)
 best_params["dim"] = TIME_PERIODS
 best_params["num_classes"] = len(LABELS)
 best_params["channels"] = N_FEATURES
-batch_size = best_params.pop("batch_size")
+
 
 model = PreConvTransformer(**best_params).to(device)
 
@@ -165,14 +172,15 @@ optimizer = optim.Adam(model.parameters(), lr=0.0001)
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 train_loader = DataLoader(
-    train, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count()
+    train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
-    test, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count()
+    test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
-loss_list = [np.inf]
+loss_list = list()
+p_models = list()
 
-for ep in range(1, epochs):
+for ep in range(1, MAX_EPOCH + 1):
     losses = list()
     for batch in train_loader:
         x, t = batch
@@ -187,9 +195,13 @@ for ep in range(1, epochs):
         losses.append(loss.item())
     ls = np.mean(losses)
     loss_list.append(ls)
-    if is_worse(loss_list, ref_size, "minimize"):
+    if ep > REF_SIZE and is_worse(loss_list, REF_SIZE, "minimize"):
         print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+        model = p_models[-REF_SIZE]
         break
+    if ep > REF_SIZE:
+        del p_models[0]  # del oldest model
+    loss_list.append(ls)
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
 
 
