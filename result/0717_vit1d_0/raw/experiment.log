@@ -1,8 +1,0 @@
-MODEL_NAME:  vit1d
-Start time:  2023-07-17 18:28:50.028107
-Device:  cuda
-Max Epochs:  500
-Early Stopping Reference Size:  5
-Epoch 001: | Loss: 0.81756
-Estimated time: 1:01:24.603500
-Estimated finish: 2023-07-17 19:30:25.285109
