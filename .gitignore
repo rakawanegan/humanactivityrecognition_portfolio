@@ -3,3 +3,4 @@ lib/__pycache__/
 result/*/raw/model.pkl
 result/*/raw/lib/__pycache__/
 config.ini
+local_exe.py
