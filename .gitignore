@@ -1,3 +1,4 @@
 data/
 lib/__pycache__/
 result/*/raw/model.pkl
+result/*/raw/lib/__pycache__/
