@@ -126,6 +126,7 @@ for ep in range(1, MAX_EPOCH + 1):
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     losslist.append(ls)
 model = best_model
+
 plt.plot(losslist)
 plt.title("Loss curve")
 plt.xlabel("Epoch")

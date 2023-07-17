@@ -32,7 +32,6 @@ def main():
         idx += 1
     dirname = f"result/{date}_{args.path}_{idx}"
     os.makedirs(dirname)
-    os.makedirs(dirname)
     os.makedirs(f"{dirname}/raw", exist_ok=True)
     os.makedirs(f"{dirname}/processed", exist_ok=True)
     cp_lib = run_command(f"cp -r lib/ {dirname}/raw/")
