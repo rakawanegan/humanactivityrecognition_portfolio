@@ -102,7 +102,6 @@ def is_worse(losslist, REF_SIZE, axis="minimize"):
 
 
 losslist = list()
-p_models = list()
 
 for ep in range(1, MAX_EPOCH + 1):
     losses = list()
@@ -118,16 +117,15 @@ for ep in range(1, MAX_EPOCH + 1):
         optimizer.step()
         losses.append(loss.item())
     ls = np.mean(losses)
-    p_models.append(copy.deepcopy(model))
-    if ep > REF_SIZE and is_worse(losslist, REF_SIZE, "minimize"):
-        print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-        model = p_models[0]
-        break
     if ep > REF_SIZE:
-        del p_models[0]  # del oldest model
+        if min(losslist) > ls:
+            best_model = copy.deepcopy(model)
+        if is_worse(losslist, REF_SIZE, "minimize"):
+            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+            break
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     losslist.append(ls)
-
+model = best_model
 plt.plot(losslist)
 plt.title("Loss curve")
 plt.xlabel("Epoch")
