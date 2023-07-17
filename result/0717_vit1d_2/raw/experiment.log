@@ -1,0 +1,5 @@
+MODEL_NAME:  vit1d
+Start time:  2023-07-17 18:14:52.559071
+Device:  cuda
+Max Epochs:  500
+Early Stopping Reference Size:  5
