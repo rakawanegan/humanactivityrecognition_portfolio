@@ -27,15 +27,20 @@ def parse_args():
 def main():
     args = parse_args()
     date = datetime.datetime.now().strftime("%m%d")
-    os.makedirs(f"result/{date}_{args.path}")
-    os.makedirs(f"result/{date}_{args.path}/raw", exist_ok=True)
-    os.makedirs(f"result/{date}_{args.path}/processed", exist_ok=True)
-    cp_lib = run_command(f"cp -r lib/ result/{date}_{args.path}/raw/")
-    cp_main = run_command(f"cp {args.path}.py result/{date}_{args.path}/raw/")
+    idx = 0
+    while os.path.exists(f"result/{date}_{args.path}_{idx}"):
+        idx += 1
+    dirname = f"result/{date}_{args.path}_{idx}"
+    os.makedirs(dirname)
+    os.makedirs(dirname)
+    os.makedirs(f"{dirname}/raw", exist_ok=True)
+    os.makedirs(f"{dirname}/processed", exist_ok=True)
+    cp_lib = run_command(f"cp -r lib/ {dirname}/raw/")
+    cp_main = run_command(f"cp {args.path}.py {dirname}/raw/")
     main = run_command(
-        f"python3 {args.path}.py > result/{datetime.datetime.now().strftime('%m%d')}_{args.path}/raw/experiment.log"
+        f"python3 {args.path}.py > {dirname}/raw/experiment.log"
     )
-    rp(f"{date}_{args.path}")
+    rp(dirname)
 
 
 if __name__ == "__main__":
