@@ -53,6 +53,21 @@ print("Device: ", device)
 print("Max Epochs: ", MAX_EPOCH)
 print("Early Stopping Reference Size: ", REF_SIZE)
 
+adm_params = {
+    "lr": 0.0001,
+    "betas": (0.9, 0.999),
+    "eps": 1e-08,
+    "weight_decay": 0,
+    "amsgrad": False,
+}
+
+calr_params = {
+    "T_max": 200,
+    "eta_min": 0,
+    "last_epoch": -1,
+    "verbose": False,
+}
+
 pct_params = {
     "hidden_ch": 15,
     "num_classes": len(LABELS),
@@ -68,7 +83,8 @@ pct_params = {
 model = PreConvTransformer(**pct_params).to(device)
 
 loss_function = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.0001)
+optimizer = optim.Adam(model.parameters(), **adm_params)
+scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 
 class SeqDataset(TensorDataset):
@@ -121,8 +137,9 @@ for ep in range(1, MAX_EPOCH + 1):
         loss.backward()
         optimizer.step()
         losses.append(loss.item())
+    scheduler.step()
     ls = np.mean(losses)
-    if ep > REF_SIZE:
+    if ep > calr_params["T_max"]:
         if min(losslist) > ls:
             best_model = copy.deepcopy(model)
         if is_worse(losslist, REF_SIZE, "minimize"):
@@ -169,14 +186,20 @@ print("Total time: ", end_date - start_date)
 
 
 param = dict()
-param["MODEL_NAME"] = MODEL_NAME
-param["start_date"] = start_date
-param["end_date"] = end_date
+param["MODEL NAME"] = MODEL_NAME
+param["start date"] = start_date
+param["end date"] = end_date
 param["LABELS"] = LABELS
-param["TIME_PERIODS"] = TIME_PERIODS
-param["STEP_DISTANCE"] = STEP_DISTANCE
-param["N_FEATURES"] = N_FEATURES
+param["TIME PERIODS"] = TIME_PERIODS
+param["STEP DISTANCE"] = STEP_DISTANCE
+param["N FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
+param["MAX EPOCH"] = MAX_EPOCH
+param["BATCH SIZE"] = BATCH_SIZE
+param["REF SIZE"] = REF_SIZE
+param["Adam params"] = adm_params
+param["CosineAnnealingLRScheduler params"] = calr_params
+param["Model params"] = pct_params
 
 joblib.dump(param, f"{dirname}/raw/param.pkl")
