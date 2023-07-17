@@ -46,8 +46,8 @@ def generate_experiment_memo(dir:str, date, experiment_info:dict):
 
     create_experiment_memo(dir, memo_content)
 
-def result_process(name):
-    path = os.path.join("result", name, "raw/")
+def result_process(dirname):
+    path = os.path.join(dirname, "raw/")
     # model = joblib.load(os.path.join(path, "model.pkl"))
     param = joblib.load(os.path.join(path, "param.pkl"))
     study = joblib.load(os.path.join(path, "study.pkl")) if os.path.exists(os.path.join(path, "study.pkl")) else None
@@ -79,7 +79,7 @@ def result_process(name):
     plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
-    plt.savefig(f"result/{name}/processed/cross-tab.png")
+    plt.savefig(f"{dirname}/processed/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
     time_diff = (param["end_date"] - param["start_date"]).total_seconds()
     execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
@@ -96,4 +96,4 @@ def result_process(name):
         "Loss curve": "![alt](./loss.png)",
     }
 
-    generate_experiment_memo(f"result/{name}/processed/", content["Start date"], content)
+    generate_experiment_memo(f"{dirname}/processed/", content["Start date"], content)

@@ -33,6 +33,11 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
+idx = 0
+while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{idx}"):
+    idx += 1
+dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{idx}"
+
 x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
@@ -131,10 +136,10 @@ plt.plot(losslist)
 plt.title("Loss curve")
 plt.xlabel("Epoch")
 plt.ylabel("Loss mean")
-plt.savefig(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/processed/loss.png")
+plt.savefig(f"{dirname}/processed/loss.png")
 
 model.eval()
-joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")
+joblib.dump(model, f"{dirname}/raw/model.pkl")
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
@@ -148,7 +153,7 @@ y_test = y_test.argmax(axis=-1)
 
 predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
-predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
+predict.to_csv(f"{dirname}/raw/predict.csv")
 
 print("Model's state_dict:")
 for param_tensor in model.state_dict():
@@ -174,4 +179,4 @@ param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
 
-joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")
+joblib.dump(param, f"{dirname}/raw/param.pkl")
