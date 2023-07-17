@@ -28,7 +28,7 @@ def read_config(path,name):
 
 
 def send_email(subject:str, body:str) -> bool:
-    dic = read_config("./config.ini","gmail")
+    dic = read_config("../config.ini","gmail")
     smtpobj = smtplib.SMTP('smtp.gmail.com', 587)
     smtpobj.starttls()
     smtpobj.login(dic["adress"], dic["password"])
