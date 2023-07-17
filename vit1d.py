@@ -50,7 +50,7 @@ def is_worse(losslist, REF_SIZE, axis="minimize"):
 
 
 # Hyperparameters
-MAX_EPOCH = 200
+MAX_EPOCH = 500
 BATCH_SIZE = 128
 REF_SIZE = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
