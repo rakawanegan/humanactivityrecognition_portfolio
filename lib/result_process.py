@@ -92,7 +92,8 @@ def result_process(name):
         "Optuna search space": '\n'.join([f'- {key}: {"".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if study is not None else None,
         "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
         "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
-        "Confusion_matrix": "![alt](./cross-tab.png)"
+        "Confusion_matrix": "![alt](./cross-tab.png)",
+        "Loss curve": "![alt](./loss.png)",
     }
 
     generate_experiment_memo(f"result/{name}/processed/", content["Start date"], content)

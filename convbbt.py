@@ -128,6 +128,11 @@ for ep in range(1, MAX_EPOCH + 1):
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     losslist.append(ls)
 
+plt.plot(losslist)
+plt.title("Loss curve")
+plt.xlabel("Epoch")
+plt.ylabel("Loss mean")
+plt.savefig(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/processed/loss.png")
 
 model.eval()
 joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")

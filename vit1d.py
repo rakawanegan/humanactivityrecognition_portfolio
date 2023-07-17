@@ -5,6 +5,7 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader, TensorDataset
@@ -71,8 +72,6 @@ model = ViT(
     emb_dropout=0.1,
 ).to(device)
 
-REF_SIZE = 5
-losslist = list()
 loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
@@ -97,7 +96,7 @@ train_loader = DataLoader(
 test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
-loss_list = list()
+losslist = list()
 p_models = list()
 
 for ep in range(1, MAX_EPOCH + 1):
@@ -122,8 +121,13 @@ for ep in range(1, MAX_EPOCH + 1):
     if ep > REF_SIZE:
         del p_models[0]  # del oldest model
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
-    loss_list.append(ls)
+    losslist.append(ls)
 
+plt.plot(losslist)
+plt.title("Loss curve")
+plt.xlabel("Epoch")
+plt.ylabel("Loss mean")
+plt.savefig(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/processed/loss.png")
 
 model.eval()
 joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")
