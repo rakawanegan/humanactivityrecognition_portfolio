@@ -35,10 +35,10 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
-idx = 0
-while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{idx}"):
-    idx += 1
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{idx}"
+diridx = 0
+while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    diridx += 1
+dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 
 x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
