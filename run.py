@@ -1,20 +1,9 @@
 import argparse
 import datetime
 import os
-import subprocess
 
 from lib.result_process import result_process as rp
-
-
-def run_command(command):
-    try:
-        result = subprocess.run(
-            command, shell=True, check=True, capture_output=True, text=True
-        )
-        return result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        print(f"Command execution failed with error: {e.stderr}")
-        return None
+from lib.local_utils import send_email, run_command
 
 
 def parse_args():
@@ -45,6 +34,7 @@ def main():
     rp(dirname)
     print("result done")
     print(f"{date}_{args.path}_{idx} done")
+    send_email(f"{date}_{args.path}_{idx} done", f"{date}_{args.path}_{idx} is done")
 
 
 if __name__ == "__main__":

@@ -14,6 +14,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from lib.model import PreConvTransformer
 from lib.preprocess import get_data
+from lib.local_utils import send_email
+
 
 MODEL_NAME = "convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
@@ -124,6 +126,7 @@ def is_worse(losslist, REF_SIZE, axis="minimize"):
 
 losslist = list()
 
+ep_start = datetime.datetime.now()
 for ep in range(1, MAX_EPOCH + 1):
     losses = list()
     for batch in train_loader:
@@ -147,6 +150,14 @@ for ep in range(1, MAX_EPOCH + 1):
             break
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     losslist.append(ls)
+    if ep == 1:
+        ep_delta = datetime.datetime.now() - ep_start
+        print(f"Estimated time: {ep_delta * MAX_EPOCH}")
+        print(f"Estimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}")
+        send_email(
+            "Training started",
+            f"Training started at {ep_start.strftime('%Y-%m-%d %H:%M:%S')}\nEstimated time: {ep_delta * MAX_EPOCH}\nEstimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}"
+        )
 model = best_model
 
 plt.plot(losslist)
