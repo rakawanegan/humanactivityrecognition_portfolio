@@ -70,3 +70,16 @@ def create_study(dirname: str) -> list:
         plt.savefig(os.path.join(dirname, "processed/assets", f"{key}.png"))
         plt.close()
     return param_keys
+
+
+def is_worse(losslist, REF_SIZE, axis="minimize"):
+    if axis == "minimize":
+        return all(
+            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
+        )
+    elif axis == "maximize":
+        return all(
+            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
+        )
+    else:
+        raise ValueError("Invalid axis value: " + axis)

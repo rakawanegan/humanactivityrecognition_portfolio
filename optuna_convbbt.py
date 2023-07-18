@@ -15,6 +15,8 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from lib.model import PreConvTransformer
 from lib.preprocess import get_data
+from lib.local_utils import is_worse
+
 
 MODEL_NAME = "optuna_convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
@@ -64,19 +66,6 @@ class SeqDataset(TensorDataset):
 
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
-
-
-def is_worse(losslist, REF_SIZE, axis="minimize"):
-    if axis == "minimize":
-        return all(
-            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
-        )
-    elif axis == "maximize":
-        return all(
-            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
-        )
-    else:
-        raise ValueError("Invalid axis value: " + axis)
 
 
 search_space = {

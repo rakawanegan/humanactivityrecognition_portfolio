@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from lib.model import ViT
 from lib.preprocess import get_data
-from lib.local_utils import send_email
+from lib.local_utils import send_email, is_worse
 
 
 MODEL_NAME = "vit1d"
@@ -42,20 +42,6 @@ dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
-
-
-def is_worse(losslist, REF_SIZE, axis="minimize"):
-    if axis == "minimize":
-        return all(
-            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
-        )
-    elif axis == "maximize":
-        return all(
-            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
-        )
-    else:
-        raise ValueError("Invalid axis value: " + axis)
-
 
 # Hyperparameters
 MAX_EPOCH = 500

@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from lib.model import PreConvTransformer
 from lib.preprocess import get_data
-from lib.local_utils import send_email
+from lib.local_utils import send_email, is_worse
 
 
 MODEL_NAME = "convbbt"
@@ -110,20 +110,6 @@ train_loader = DataLoader(
 test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
-
-
-def is_worse(losslist, REF_SIZE, axis="minimize"):
-    if axis == "minimize":
-        return all(
-            x > y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
-        )
-    elif axis == "maximize":
-        return all(
-            x < y for x, y in zip(losslist[-REF_SIZE:], losslist[-REF_SIZE - 1 : -1])
-        )
-    else:
-        raise ValueError("Invalid axis value: " + axis)
-
 
 losslist = list()
 
