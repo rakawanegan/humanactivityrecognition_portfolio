@@ -48,14 +48,15 @@ python3 run.py --path [py file name]
 <pre>
 .
 ├── README.md: this file
-├── assets: image folder
+├── assets: image folder using README.md
+├── config.ini: you have to set this file refer to sample.ini
 ├── cnn1d_tf.py: main file(1d-cnn)
 ├── convbbt.py: main file(conv.backbone transformer)
 ├── optuna_convbbt.py: main file(conv.backbone transformer with optuna)
 ├── vit1d.py: main file(1d-vision transformer)
 ├── optuna_vit1d.py: main file(1d-vision transformer with optuna)
 ├── data: WISDM dataset
-│   ├── readme.txt
+│   ├── readme.txt: this dataset's readme(original)
 │   ├── WISDM_ar_v1.1.csv
 │   ├── WISDM_ar_v1.1_raw_about.txt
 │   └── WISDM_ar_v1.1_raw.txt
@@ -69,17 +70,19 @@ python3 run.py --path [py file name]
 ├── result
 │   └── MMDD_main
 │       ├── processed
-│       │   ├── cross-tab.png
-│       │   └── lab_notebook.md # result of experiment
+│       │   ├── assets: image folder using lab_notebook.md
+│       │   └── lab_notebook.md ## result of experiment ##
 │       └── raw
-│           ├── main.py
-│           ├── experiment.log
+│           ├── experiment.log: runing log file
+│           ├── main.py: gurantee experiment envirnment
 │           ├── lib
 │           │   ├── model.py
 │           │   ├── preprocess.py
 │           │   └── result_process.py
-│           ├── param.pkl
-│           └── predict.csv
+│           ├── param.pkl: experiment feature dict object
+│           ├── model.pkl: pre-trained model object written in Pytorch
+│           ├── study.pkl: optuna's study object
+│           └── predict.csv: contain index, predict value, answer value
 └── run.py: run script
 </pre>
 
