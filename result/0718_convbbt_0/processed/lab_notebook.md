@@ -42,9 +42,14 @@ None
 - MAX EPOCH: 500
 - BATCH SIZE: 128
 - REF SIZE: 5
-- Adam params: {'lr': 0.0001, 'betas': (0.9, 0.999), 'eps': 1e-08, 'weight_decay': 0, 'amsgrad': False}
-- CosineAnnealingLRScheduler params: {'T_max': 200, 'eta_min': 0, 'last_epoch': -1, 'verbose': False}
-- Model params: {'hidden_ch': 15, 'num_classes': 6, 'input_dim': 80, 'channels': 3, 'hidden_dim': 128, 'depth': 5, 'heads': 8, 'mlp_dim': 1024, 'dropout': 0.01, 'emb_dropout': 0.01}
+
+## Adam params
+- lr: 0.0001
+- betas': (0.9, 0.999), 'eps': 1e-08, 'weight_decay': 0, 'amsgrad': False}
+##  CosineAnnealingLRScheduler params
+ {'T_max': 200, 'eta_min': 0, 'last_epoch': -1, 'verbose': False}
+## Model params
+ {'hidden_ch': 15, 'num_classes': 6, 'input_dim': 80, 'channels': 3, 'hidden_dim': 128, 'depth': 5, 'heads': 8, 'mlp_dim': 1024, 'dropout': 0.01, 'emb_dropout': 0.01}
 
 ## Model size
 Size: 10612929   B
