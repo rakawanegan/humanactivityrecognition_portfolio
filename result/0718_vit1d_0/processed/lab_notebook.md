@@ -32,6 +32,30 @@ vit1d
 ## Optuna search space
 None
 
+## Adam param
+- lr: 0.0001
+- betas: (0.9, 0.999)
+- eps: 1e-08
+- weight_decay: 0
+- amsgrad: False
+
+## CosineAnnealingLRScheduler param
+- T_max: 50
+- eta_min: 0
+- last_epoch: -1
+- verbose: False
+
+## Model param
+- seq_len: 80
+- patch_size: 5
+- num_classes: 6
+- dim: 1024
+- depth: 6
+- heads: 8
+- mlp_dim: 2048
+- dropout: 0.1
+- emb_dropout: 0.1
+
 ## Feature param
 - LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
 - TIME PERIODS: 80
@@ -42,9 +66,6 @@ None
 - MAX EPOCH: 500
 - BATCH SIZE: 128
 - REF SIZE: 5
-- Adam params: {'lr': 0.0001, 'betas': (0.9, 0.999), 'eps': 1e-08, 'weight_decay': 0, 'amsgrad': False}
-- CosineAnnealingLRScheduler params: {'T_max': 50, 'eta_min': 0, 'last_epoch': -1, 'verbose': False}
-- Model params: {'seq_len': 80, 'patch_size': 5, 'num_classes': 6, 'dim': 1024, 'depth': 6, 'heads': 8, 'mlp_dim': 2048, 'dropout': 0.1, 'emb_dropout': 0.1}
 
 ## Model size
 Size: 151409920  B
