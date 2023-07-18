@@ -22,8 +22,9 @@ def main():
     dirname = f"result/{date}_{args.path}_{idx}"
     print(f"{date}_{args.path}_{idx} running...")
     os.makedirs(dirname)
-    os.makedirs(f"{dirname}/raw", exist_ok=True)
-    os.makedirs(f"{dirname}/processed", exist_ok=True)
+    os.makedirs(f"{dirname}/raw")
+    os.makedirs(f"{dirname}/processed")
+    os.makedirs(f"{dirname}/processed/assets")
     cp_lib = run_command(f"cp -r lib/ {dirname}/raw/")
     cp_main = run_command(f"cp {args.path}.py {dirname}/raw/")
     print("setup done")

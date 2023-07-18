@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import subprocess
+from local_utils import create_study
 
 
 def run_command(command):
@@ -48,12 +49,9 @@ def generate_experiment_memo(dir:str, date, experiment_info:dict):
 
 def result_process(dirname):
     path = os.path.join(dirname, "raw/")
-    # model = joblib.load(os.path.join(path, "model.pkl"))
     param = joblib.load(os.path.join(path, "param.pkl"))
-    study = joblib.load(os.path.join(path, "study.pkl")) if os.path.exists(os.path.join(path, "study.pkl")) else None
-    # best_trial = study.best_trial if study is not None else None
-    search_space = param.pop("search_space") if study is not None else None
-    # log = pd.read_csv(os.path.join(path, "experiment.log"), index_col=0)
+    hparam_names = create_study(dirname)
+    search_space = param.pop("search_space") if hparam_names is not None else None
     y = pd.read_csv(os.path.join(path, "predict.csv"), index_col=0)
 
     # Creates a confusion matrix
@@ -79,24 +77,26 @@ def result_process(dirname):
     plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
-    plt.savefig(f"{dirname}/processed/cross-tab.png")
+    plt.savefig(f"{dirname}/processed/assets/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
     time_diff = (param["end date"] - param["start date"]).total_seconds()
     execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
+    hparam_picdirs = {name: f"./assets/{name}.png" for name in hparam_names} if hparam_names is not None else None
     content = {
         "Model name": param.pop("MODEL NAME"),
         "Start date": param.pop("start date"),
         "End date": param.pop("end date"),
         "Execution time": execution_time,
         "Report": convert_to_markdown_table(report),
-        "Optuna search space": '\n'.join([f'- {key}: {"".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if study is not None else None,
+        "Optuna search space": '\n'.join([f'- {key}: {"".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if search_space is not None else None,
         "Adam param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.pop("Adam params").items()]),
         "CosineAnnealingLRScheduler param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.pop("CosineAnnealingLRScheduler params").items()]),
         "Model param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.pop("Model params").items()]),
         "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
         "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
-        "Confusion_matrix": "![alt](./cross-tab.png)",
-        "Loss curve": "![alt](./loss.png)",
+        "Confusion_matrix": "![alt](./assets/cross-tab.png)",
+        "Loss curve": "![alt](./assets/loss.png)",
+        "Hyper parameter plots": '\n'.join([f'### {key}\n: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in hparam_picdirs.items()]) if hparam_picdirs is not None else None,
     }
 
     generate_experiment_memo(f"{dirname}/processed/", content["Start date"], content)

@@ -165,7 +165,7 @@ plt.plot(losslist)
 plt.title("Loss curve")
 plt.xlabel("Epoch")
 plt.ylabel("Loss mean")
-plt.savefig(f"{dirname}/processed/loss.png")
+plt.savefig(f"{dirname}/processed/assets/loss.png")
 
 model.eval()
 joblib.dump(model, f"{dirname}/raw/model.pkl")
