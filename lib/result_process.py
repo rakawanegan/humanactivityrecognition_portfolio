@@ -81,12 +81,12 @@ def result_process(dirname):
     plt.xlabel("Predicted label")
     plt.savefig(f"{dirname}/processed/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
-    time_diff = (param["end_date"] - param["start_date"]).total_seconds()
+    time_diff = (param["end date"] - param["start date"]).total_seconds()
     execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
     content = {
-        "Model name": param.pop("MODEL_NAME"),
-        "Start date": param.pop("start_date"),
-        "End date": param.pop("end_date"),
+        "Model name": param.pop("MODEL NAME"),
+        "Start date": param.pop("start date"),
+        "End date": param.pop("end date"),
         "Execution time": execution_time,
         "Report": convert_to_markdown_table(report),
         "Optuna search space": '\n'.join([f'- {key}: {"".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if study is not None else None,
