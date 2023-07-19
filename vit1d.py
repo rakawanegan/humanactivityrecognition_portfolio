@@ -8,11 +8,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 
 from lib.model import ViT
 from lib.preprocess import get_data
-from lib.local_utils import send_email, is_worse
+from lib.local_utils import send_email, is_worse, SeqDataset
 
 
 MODEL_NAME = "vit1d"
@@ -70,7 +70,7 @@ calr_params = {
 }
 
 vit_params = {
-    "seq_len": x_train.shape[1],
+    "seq_len": TIME_PERIODS,
     "patch_size": 5,
     "num_classes": len(LABELS),
     "dim": 1024,
@@ -87,18 +87,6 @@ optimizer = optim.Adam(model.parameters(), **adm_params)
 scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 
-class SeqDataset(TensorDataset):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, idx):
-        return self.x[idx], self.y[idx]
-
-
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 train_loader = DataLoader(
@@ -110,6 +98,7 @@ test_loader = DataLoader(
 losslist = list()
 
 ep_start = datetime.datetime.now()
+best_model = copy.deepcopy(model)
 for ep in range(1, MAX_EPOCH + 1):
     losses = list()
     for batch in train_loader:

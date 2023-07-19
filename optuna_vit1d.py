@@ -6,16 +6,15 @@ import joblib
 import numpy as np
 import optuna
 import pandas as pd
-import seaborn as sns
 import torch
 from matplotlib import pyplot as plt
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score
 from torch import nn
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 
 from lib.model import ViT
 from lib.preprocess import get_data
-from lib.local_utils import is_worse
+from lib.local_utils import is_worse, SeqDataset
 
 
 MODEL_NAME = "optuna_vit1d"
@@ -37,10 +36,15 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
+diridx = 0
+while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    diridx += 1
+diridx -= 1
+dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+
 x_train, x_test, y_train, y_test = get_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
-
 
 # Hyperparameters
 MAX_EPOCH = 200
@@ -54,48 +58,63 @@ print("Max Epochs: ", MAX_EPOCH)
 print("Early Stopping Reference Size: ", REF_SIZE)
 
 
-class SeqDataset(TensorDataset):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, idx):
-        return self.x[idx], self.y[idx]
-
-
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
-
-search_space = {
-    "patch_size": [1, 2, 5, 8, 10, 16, 40],
-    "dim": [32, 64, 128, 256, 512],
-    "depth": [3, 5, 6, 8],
-    "heads": [3, 5, 6, 8, 10],
-    "mlp_dim": [256, 512, 1024, 2048],
-    "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
-    "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+adam_searchspace = {
+    "lr": [],
+    "beta1": [],
+    "beta2": [],
+    "eps": [],
 }
+
+calr_searchspace = {
+    "T_max": [],
+    "eta_min": [],
+    "last_epoch": [],
+}
+
+vit_searchspace = {
+    "patch_size": [],
+    "dim": [],
+    "depth": [],
+    "heads": [],
+    "mlp_dim": [],
+    "dropout": [],
+    "emb_dropout": [],
+}
+
+search_space = adam_searchspace | calr_searchspace | vit_searchspace
 
 
 def obj(trial):
-    params = {
+    adm_params = {
+        "lr": trial.suggest_categorical("lr", adam_searchspace["lr"]),
+        "beta1": trial.suggest_categorical("beta1", adam_searchspace["beta1"]),
+        "beta2": trial.suggest_categorical("beta2", adam_searchspace["beta2"]),
+        "eps": trial.suggest_categorical("eps", adam_searchspace["eps"]),
+    }
+    adm_params["betas"] = (adm_params["beta1"], adm_params["beta2"])
+
+    calr_params = {
+        "T_max": trial.suggest_categorical("T_max", calr_searchspace["T_max"]),
+        "eta_min": trial.suggest_categorical("eta_min", calr_searchspace["eta_min"]),
+        "last_epoch": trial.suggest_categorical("last_epoch", calr_searchspace["last_epoch"]),
+    }
+    vit_params = {
         "seq_len": TIME_PERIODS,
         "num_classes": len(LABELS),
         "channels": N_FEATURES,
         "patch_size": trial.suggest_categorical(
             "patch_size", search_space["patch_size"]
         ),
-        "dim": trial.suggest_categorical("dim", search_space["dim"]),
-        "depth": trial.suggest_categorical("depth", search_space["depth"]),
-        "heads": trial.suggest_categorical("heads", search_space["heads"]),
-        "mlp_dim": trial.suggest_categorical("mlp_dim", search_space["mlp_dim"]),
-        "dropout": trial.suggest_categorical("dropout", search_space["dropout"]),
+        "dim": trial.suggest_categorical("dim", vit_searchspace["dim"]),
+        "depth": trial.suggest_categorical("depth", vit_searchspace["depth"]),
+        "heads": trial.suggest_categorical("heads", vit_searchspace["heads"]),
+        "mlp_dim": trial.suggest_categorical("mlp_dim", vit_searchspace["mlp_dim"]),
+        "dropout": trial.suggest_categorical("dropout", vit_searchspace["dropout"]),
         "emb_dropout": trial.suggest_categorical(
-            "emb_dropout", search_space["emb_dropout"]
+            "emb_dropout", vit_searchspace["emb_dropout"]
         ),
     }
 
@@ -103,12 +122,14 @@ def obj(trial):
     test_loader = DataLoader(
         test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
     )
-    model = ViT(**params).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), **adm_params)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
+    model = ViT(**vit_params).to(device)
+
     losslist = list()
-    p_models = list()
-    for epoch in range(MAX_EPOCH):
+    opbest_model = copy.deepcopy(model)
+    for ep in range(MAX_EPOCH):
         for i, (inputs, labels) in enumerate(train_loader):
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -118,14 +139,16 @@ def obj(trial):
             loss.backward()
             optimizer.step()
         ls = np.mean(losses)
+        scheduler.step()
+        if ep > calr_params["T_max"]:
+            if min(losslist) > ls:
+                opbest_model = copy.deepcopy(model)
+            if is_worse(losslist, REF_SIZE, "minimize"):
+                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+                break
+        print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
         losslist.append(ls)
-        p_models.append(copy.deepcopy(model))
-        if ep > REF_SIZE and is_worse(losslist, REF_SIZE, "minimize"):
-            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-            model = p_models[-REF_SIZE]
-            break
-        if ep > REF_SIZE:
-            del p_models[0]  # del oldest model
+    model = opbest_model
 
     accuracies = list()
     model.eval()
@@ -150,14 +173,19 @@ study.optimize(obj, n_trials=1000)
 print(study.best_trial)
 joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
 
-best_params = dict(study.best_params)
-best_params["seq_len"] = TIME_PERIODS
-best_params["num_classes"] = len(LABELS)
-best_params["channels"] = N_FEATURES
+all_params = dict(study.best_params)
+adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
+calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
+vit_params = {k: all_params[k] for k in vit_searchspace.keys()}
+vit_params["seq_len"] = TIME_PERIODS
+vit_params["num_classes"] = len(LABELS)
+vit_params["channels"] = N_FEATURES
 
 
-model = ViT(**best_params).to(device)
+model = ViT(**vit_params).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)
+
 loss_function = nn.CrossEntropyLoss()
 train_loader = DataLoader(
     train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
@@ -167,7 +195,8 @@ test_loader = DataLoader(
 )
 
 loss_list = list()
-p_models = list()
+
+best_model = copy.deepcopy(model)
 for ep in range(1, MAX_EPOCH + 1):
     losses = list()
     for batch in train_loader:
@@ -181,16 +210,23 @@ for ep in range(1, MAX_EPOCH + 1):
         loss.backward()
         optimizer.step()
         losses.append(loss.item())
+    scheduler.step()
     ls = np.mean(losses)
-    p_models.append(copy.deepcopy(model))
-    if ep > REF_SIZE and is_worse(loss_list, REF_SIZE, "minimize"):
-        print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-        model = p_models[0]
-        break
-    if ep > REF_SIZE:
-        del p_models[0]  # del oldest model
+    if ep > calr_params["T_max"]:
+        if min(loss_list) > ls:
+            best_model = copy.deepcopy(model)
+        if is_worse(loss_list, REF_SIZE, "minimize"):
+            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+            break
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     loss_list.append(ls)
+model = best_model
+
+plt.plot(loss_list)
+plt.title("Loss curve")
+plt.xlabel("Epoch")
+plt.ylabel("Loss mean")
+plt.savefig(f"{dirname}/processed/assets/loss.png")
 
 
 model.eval()

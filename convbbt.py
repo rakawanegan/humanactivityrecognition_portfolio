@@ -5,16 +5,14 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import torch
 from matplotlib import pyplot as plt
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from torch import nn, optim
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 
 from lib.model import PreConvTransformer
 from lib.preprocess import get_data
-from lib.local_utils import send_email, is_worse
+from lib.local_utils import send_email, is_worse, SeqDataset
 
 
 MODEL_NAME = "convbbt"
@@ -72,10 +70,10 @@ calr_params = {
 }
 
 pct_params = {
-    "hidden_ch": 15,
     "num_classes": len(LABELS),
     "input_dim": TIME_PERIODS,
     "channels": N_FEATURES,
+    "hidden_ch": 15,
     "hidden_dim": 128,
     "depth": 5,
     "heads": 8,
@@ -90,18 +88,6 @@ optimizer = optim.Adam(model.parameters(), **adm_params)
 scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 
-class SeqDataset(TensorDataset):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __len__(self):
-        return len(self.y)
-
-    def __getitem__(self, idx):
-        return self.x[idx], self.y[idx]
-
-
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 train_loader = DataLoader(
@@ -114,6 +100,7 @@ test_loader = DataLoader(
 losslist = list()
 
 ep_start = datetime.datetime.now()
+best_model = copy.deepcopy(model)
 for ep in range(1, MAX_EPOCH + 1):
     losses = list()
     for batch in train_loader:

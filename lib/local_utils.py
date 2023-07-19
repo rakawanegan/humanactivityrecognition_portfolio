@@ -6,7 +6,7 @@ import subprocess
 import joblib
 import matplotlib.pyplot as plt
 import os
-
+from torch.utils.data import DataLoader, TensorDataset
 
 def run_command(command):
     try:
@@ -83,3 +83,15 @@ def is_worse(losslist, REF_SIZE, axis="minimize"):
         )
     else:
         raise ValueError("Invalid axis value: " + axis)
+
+
+class SeqDataset(TensorDataset):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __len__(self):
+        return len(self.y)
+
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
