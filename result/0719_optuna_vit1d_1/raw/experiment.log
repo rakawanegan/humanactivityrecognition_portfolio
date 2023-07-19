@@ -1,5 +1,0 @@
-MODEL_NAME:  optuna_vit1d
-Start time:  2023-07-19 11:59:01.367454
-Device:  cuda
-Max Epochs:  200
-Early Stopping Reference Size:  5
