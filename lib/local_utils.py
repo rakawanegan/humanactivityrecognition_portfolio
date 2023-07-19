@@ -46,32 +46,6 @@ def send_email(subject:str, body:str) -> bool:
     smtpobj.close()
     return True
 
-
-def create_study(dirname: str) -> list:
-    if os.path.exists(os.path.join(dirname, "raw", "study.pkl")):
-        return None
-    study = joblib.load(os.path.join(dirname, "raw", "study.pkl"))
-    best_trial = study.best_trial
-    param_keys = list(best_trial.params.keys())
-    param_values = {key: list() for key in param_keys}
-    scores = list()
-
-    for trial in study.trials:
-        for key in param_keys:
-            param_values[key].append(trial.params[key])
-        scores.append(trial.value)
-
-    # show scatter
-    for key in param_keys:
-        plt.figure()
-        plt.scatter(param_values[key], scores, s=8)
-        plt.xlabel(key)
-        plt.ylabel("score")
-        plt.savefig(os.path.join(dirname, "processed/assets", f"{key}.png"))
-        plt.close()
-    return param_keys
-
-
 def is_worse(losslist, REF_SIZE, axis="minimize"):
     if axis == "minimize":
         return all(
