@@ -62,26 +62,25 @@ train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
 adam_searchspace = {
-    "lr": [],
-    "beta1": [],
-    "beta2": [],
-    "eps": [],
+    "lr": [1e-6, 1e-5, 1e-4, 1e-3],
+    "beta1": [0.9, 0.95, 0.99, 0.999],
+    "beta2": [0.9, 0.95, 0.99, 0.999],
+    "eps": [1e-9, 1e-8, 1e-7, 1e-6],
 }
 
 calr_searchspace = {
-    "T_max": [],
-    "eta_min": [],
-    "last_epoch": [],
+    "T_max": [50, 100, 150, 200],
+    "eta_min": [0, 1e-8, 1e-7, 1e-6, 1e-5],
 }
 
 vit_searchspace = {
-    "patch_size": [],
-    "dim": [],
-    "depth": [],
-    "heads": [],
-    "mlp_dim": [],
-    "dropout": [],
-    "emb_dropout": [],
+    "patch_size": [1, 2, 4, 5, 8, 16],
+    "dim": [64, 128, 256, 512],
+    "depth": [3, 6, 9, 12, 15],
+    "heads": [5, 8, 10, 12, 16, 20, 24],
+    "mlp_dim": [256, 512, 1024, 2048],
+    "dropout": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+    "emb_dropout": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
 }
 
 search_space = adam_searchspace | calr_searchspace | vit_searchspace
@@ -99,7 +98,6 @@ def obj(trial):
     calr_params = {
         "T_max": trial.suggest_categorical("T_max", calr_searchspace["T_max"]),
         "eta_min": trial.suggest_categorical("eta_min", calr_searchspace["eta_min"]),
-        "last_epoch": trial.suggest_categorical("last_epoch", calr_searchspace["last_epoch"]),
     }
     vit_params = {
         "seq_len": TIME_PERIODS,
