@@ -93,7 +93,7 @@ def obj(trial):
         "beta2": trial.suggest_categorical("beta2", adam_searchspace["beta2"]),
         "eps": trial.suggest_categorical("eps", adam_searchspace["eps"]),
     }
-    adm_params["betas"] = (adm_params["beta1"], adm_params["beta2"])
+    adm_params["betas"] = (adm_params.pop("beta1"), adm_params.pop("beta2"))
 
     calr_params = {
         "T_max": trial.suggest_categorical("T_max", calr_searchspace["T_max"]),
@@ -178,7 +178,7 @@ vit_params = {k: all_params[k] for k in vit_searchspace.keys()}
 vit_params["seq_len"] = TIME_PERIODS
 vit_params["num_classes"] = len(LABELS)
 vit_params["channels"] = N_FEATURES
-
+adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 
 model = ViT(**vit_params).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
