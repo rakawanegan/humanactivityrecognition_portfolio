@@ -87,17 +87,18 @@ search_space = adam_searchspace | calr_searchspace | vit_searchspace
 
 
 def obj(trial):
-    adm_params = {
-        "lr": trial.suggest_categorical("lr", adam_searchspace["lr"]),
-        "beta1": trial.suggest_categorical("beta1", adam_searchspace["beta1"]),
-        "beta2": trial.suggest_categorical("beta2", adam_searchspace["beta2"]),
-        "eps": trial.suggest_categorical("eps", adam_searchspace["eps"]),
+    adam_params = {
+        "lr": trial.suggest_categorical("lr", search_space["lr"]),
+        "betas": (
+            trial.suggest_categorical("beta1", search_space["beta1"]),
+            trial.suggest_categorical("beta2", search_space["beta2"]),
+        ),
+        "eps": trial.suggest_categorical("eps", search_space["eps"]),
     }
-    adm_params["betas"] = (adm_params.pop("beta1"), adm_params.pop("beta2"))
 
     calr_params = {
-        "T_max": trial.suggest_categorical("T_max", calr_searchspace["T_max"]),
-        "eta_min": trial.suggest_categorical("eta_min", calr_searchspace["eta_min"]),
+        "T_max": trial.suggest_categorical("T_max", search_space["T_max"]),
+        "eta_min": trial.suggest_categorical("eta_min", search_space["eta_min"]),
     }
     vit_params = {
         "seq_len": TIME_PERIODS,
@@ -106,13 +107,13 @@ def obj(trial):
         "patch_size": trial.suggest_categorical(
             "patch_size", search_space["patch_size"]
         ),
-        "dim": trial.suggest_categorical("dim", vit_searchspace["dim"]),
-        "depth": trial.suggest_categorical("depth", vit_searchspace["depth"]),
-        "heads": trial.suggest_categorical("heads", vit_searchspace["heads"]),
-        "mlp_dim": trial.suggest_categorical("mlp_dim", vit_searchspace["mlp_dim"]),
-        "dropout": trial.suggest_categorical("dropout", vit_searchspace["dropout"]),
+        "dim": trial.suggest_categorical("dim", search_space["dim"]),
+        "depth": trial.suggest_categorical("depth", search_space["depth"]),
+        "heads": trial.suggest_categorical("heads", search_space["heads"]),
+        "mlp_dim": trial.suggest_categorical("mlp_dim", search_space["mlp_dim"]),
+        "dropout": trial.suggest_categorical("dropout", search_space["dropout"]),
         "emb_dropout": trial.suggest_categorical(
-            "emb_dropout", vit_searchspace["emb_dropout"]
+            "emb_dropout", search_space["emb_dropout"]
         ),
     }
 
@@ -122,14 +123,14 @@ def obj(trial):
     )
     criterion = nn.CrossEntropyLoss()
     model = ViT(**vit_params).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), **adm_params)
+    optimizer = torch.optim.Adam(model.parameters(), **adam_params)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
     losslist = list()
     opbest_model = copy.deepcopy(model)
     for ep in range(MAX_EPOCH):
         losses = list()
-        for i, (inputs, labels) in enumerate(train_loader):
+        for inputs, labels in train_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
@@ -179,7 +180,6 @@ vit_params = {k: all_params[k] for k in vit_searchspace.keys()}
 vit_params["seq_len"] = TIME_PERIODS
 vit_params["num_classes"] = len(LABELS)
 vit_params["channels"] = N_FEATURES
-adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 
 model = ViT(**vit_params).to(device)
 optimizer = torch.optim.Adam(model.parameters(), **adam_params)
