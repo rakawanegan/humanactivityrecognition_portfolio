@@ -182,8 +182,8 @@ vit_params["channels"] = N_FEATURES
 adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 
 model = ViT(**vit_params).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50)
+optimizer = torch.optim.Adam(model.parameters(), **adam_params)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 loss_function = nn.CrossEntropyLoss()
 train_loader = DataLoader(
