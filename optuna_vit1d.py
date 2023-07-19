@@ -121,9 +121,9 @@ def obj(trial):
         test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
     )
     criterion = nn.CrossEntropyLoss()
+    model = ViT(**vit_params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), **adm_params)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
-    model = ViT(**vit_params).to(device)
 
     losslist = list()
     opbest_model = copy.deepcopy(model)
