@@ -128,6 +128,7 @@ def obj(trial):
     losslist = list()
     opbest_model = copy.deepcopy(model)
     for ep in range(MAX_EPOCH):
+        losses = list()
         for i, (inputs, labels) in enumerate(train_loader):
             inputs = inputs.to(device)
             labels = labels.to(device)
