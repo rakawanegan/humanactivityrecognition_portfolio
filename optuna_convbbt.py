@@ -36,7 +36,7 @@ LABEL = "ActivityEncoded"
 SEED = 314
 
 x_train, x_test, y_train, y_test = get_data(
-    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
+    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 diridx = 0
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
@@ -48,6 +48,7 @@ dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 MAX_EPOCH = 200
 BATCH_SIZE = 128
 REF_SIZE = 5
+TIMEOUT_HOURS = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
@@ -169,8 +170,8 @@ def obj(trial):
     return accuracy
 
 
-study = optuna.create_study(direction="maximize")
-study.optimize(obj, n_trials=1000)
+study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
+study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
 print(study.best_trial)
 joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
 
@@ -181,7 +182,6 @@ convbbt_params = {k: all_params[k] for k in convbbt_searchspace.keys()}
 convbbt_params["input_dim"] = TIME_PERIODS
 convbbt_params["num_classes"] = len(LABELS)
 convbbt_params["channels"] = N_FEATURES
-
 
 loss_function = nn.CrossEntropyLoss()
 model = PreConvTransformer(**convbbt_params).to(device)
@@ -276,5 +276,6 @@ param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
 param["search_space"] = search_space
+param["TIMEOUT_HOURS"] = TIMEOUT_HOURS
 
 joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")

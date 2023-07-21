@@ -17,7 +17,7 @@ from lib.preprocess import get_data
 from lib.local_utils import is_worse, SeqDataset
 
 
-MODEL_NAME = "optuna_vit1d"
+MODEL_NAME = "wiseoptuna_vit1d"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
@@ -62,6 +62,7 @@ print("Early Stopping Reference Size: ", REF_SIZE)
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
+#######################################################################################################################
 adam_searchspace = {
     "lr": [1e-6, 1e-5, 1e-4, 1e-3],
     "beta1": [0.9, 0.95, 0.99, 0.999],
@@ -172,6 +173,7 @@ def obj(trial):
 
 study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
+#######################################################################################################################
 print(study.best_trial)
 joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
 
@@ -229,6 +231,7 @@ plt.title("Loss curve")
 plt.xlabel("Epoch")
 plt.ylabel("Loss mean")
 plt.savefig(f"{dirname}/processed/assets/loss.png")
+
 
 model.eval()
 joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")

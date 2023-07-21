@@ -12,16 +12,15 @@ from sklearn.metrics import accuracy_score
 from torch import nn
 from torch.utils.data import DataLoader
 
-from lib.model import ViT
+from lib.model import PreConvTransformer
 from lib.preprocess import get_data
 from lib.local_utils import is_worse, SeqDataset
 
 
-MODEL_NAME = "optuna_vit1d"
+MODEL_NAME = "wiseoptuna_convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
-
 # Same labels will be reused throughout the program
 LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
 # The number of steps within one time segment
@@ -36,15 +35,14 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
+x_train, x_test, y_train, y_test = get_data(
+    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
+)
 diridx = 0
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
     diridx += 1
 diridx -= 1
 dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
-
-x_train, x_test, y_train, y_test = get_data(
-    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
-)
 
 # Hyperparameters
 MAX_EPOCH = 200
@@ -62,6 +60,7 @@ print("Early Stopping Reference Size: ", REF_SIZE)
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
+#######################################################################################################################
 adam_searchspace = {
     "lr": [1e-6, 1e-5, 1e-4, 1e-3],
     "beta1": [0.9, 0.95, 0.99, 0.999],
@@ -74,17 +73,19 @@ calr_searchspace = {
     "eta_min": [0, 1e-8, 1e-7, 1e-6, 1e-5],
 }
 
-vit_searchspace = {
-    "patch_size": [1, 2, 4, 5, 8, 16],
-    "dim": [64, 128, 256, 512],
-    "depth": [3, 6, 9, 12, 15],
-    "heads": [5, 8, 10, 12, 16, 20, 24],
+convbbt_searchspace = {
+    "hidden_ch": [3, 5, 7, 8, 10, 15],
+    "depth": [3, 5, 6, 8],
+    "heads": [3, 5, 6, 8, 10],
+    "hidden_dim": [64, 128, 256, 512, 1024],
     "mlp_dim": [256, 512, 1024, 2048],
-    "dropout": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-    "emb_dropout": [0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+    "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "batch_size": [16, 32, 64, 128, 256, 512],
 }
 
-search_space = adam_searchspace | calr_searchspace | vit_searchspace
+search_space = adam_searchspace | calr_searchspace | convbbt_searchspace
+print("Search Space: ", search_space)
 
 
 def obj(trial):
@@ -96,19 +97,18 @@ def obj(trial):
         ),
         "eps": trial.suggest_categorical("eps", search_space["eps"]),
     }
-
     calr_params = {
         "T_max": trial.suggest_categorical("T_max", search_space["T_max"]),
         "eta_min": trial.suggest_categorical("eta_min", search_space["eta_min"]),
     }
-    vit_params = {
-        "seq_len": TIME_PERIODS,
+    conbbbt_params = {
         "num_classes": len(LABELS),
+        "input_dim": TIME_PERIODS,
         "channels": N_FEATURES,
-        "patch_size": trial.suggest_categorical(
-            "patch_size", search_space["patch_size"]
+        "hidden_dim": trial.suggest_categorical(
+            "hidden_dim", search_space["hidden_dim"]
         ),
-        "dim": trial.suggest_categorical("dim", search_space["dim"]),
+        "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
         "depth": trial.suggest_categorical("depth", search_space["depth"]),
         "heads": trial.suggest_categorical("heads", search_space["heads"]),
         "mlp_dim": trial.suggest_categorical("mlp_dim", search_space["mlp_dim"]),
@@ -117,13 +117,14 @@ def obj(trial):
             "emb_dropout", search_space["emb_dropout"]
         ),
     }
-
-    train_loader = DataLoader(train, batch_size=BATCH_SIZE)
+    train_loader = DataLoader(
+        train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+    )
     test_loader = DataLoader(
         test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
     )
     criterion = nn.CrossEntropyLoss()
-    model = ViT(**vit_params).to(device)
+    model = PreConvTransformer(**conbbbt_params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), **adam_params)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
@@ -131,7 +132,7 @@ def obj(trial):
     opbest_model = copy.deepcopy(model)
     for ep in range(MAX_EPOCH):
         losses = list()
-        for inputs, labels in train_loader:
+        for i, (inputs, labels) in enumerate(train_loader):
             inputs = inputs.to(device)
             labels = labels.to(device)
             optimizer.zero_grad()
@@ -155,7 +156,7 @@ def obj(trial):
     accuracies = list()
     model.eval()
     with torch.no_grad():
-        for i, (inputs, labels) in enumerate(test_loader):
+        for inputs, labels in test_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
@@ -172,29 +173,33 @@ def obj(trial):
 
 study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
+#######################################################################################################################
 print(study.best_trial)
 joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
 
 all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
 calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
-vit_params = {k: all_params[k] for k in vit_searchspace.keys()}
-vit_params["seq_len"] = TIME_PERIODS
-vit_params["num_classes"] = len(LABELS)
-vit_params["channels"] = N_FEATURES
+convbbt_params = {k: all_params[k] for k in convbbt_searchspace.keys()}
+convbbt_params["input_dim"] = TIME_PERIODS
+convbbt_params["num_classes"] = len(LABELS)
+convbbt_params["channels"] = N_FEATURES
 
-model = ViT(**vit_params).to(device)
+
+loss_function = nn.CrossEntropyLoss()
+model = PreConvTransformer(**convbbt_params).to(device)
 optimizer = torch.optim.Adam(model.parameters(), **adam_params)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
-loss_function = nn.CrossEntropyLoss()
+
+train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
+test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 train_loader = DataLoader(
     train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
-
 loss_list = list()
 
 best_model = copy.deepcopy(model)
@@ -230,8 +235,11 @@ plt.xlabel("Epoch")
 plt.ylabel("Loss mean")
 plt.savefig(f"{dirname}/processed/assets/loss.png")
 
+
 model.eval()
-joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")
+joblib.dump(
+    model, f"result/{start_date.strftime('%m%d')}_optuna{MODEL_NAME}/raw/model.pkl"
+)
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
@@ -259,6 +267,7 @@ end_date = datetime.datetime.now()
 print("End time: ", end_date)
 print("Total time: ", end_date - start_date)
 
+
 param = dict()
 param["MODEL_NAME"] = MODEL_NAME
 param["start_date"] = start_date
@@ -270,8 +279,6 @@ param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
 param["search_space"] = search_space
-param["MAX_EPOCH"] = MAX_EPOCH
-param["BATCH_SIZE"] = BATCH_SIZE
 param["TIMEOUT_HOURS"] = TIMEOUT_HOURS
 
 joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")
