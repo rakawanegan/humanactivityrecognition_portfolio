@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 
-def get_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_rows:int=False):
+def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_rows:int=False):
     def read_data(file_path):
         column_names = [
             "user-id",

@@ -13,7 +13,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from lib.model import PreConvTransformer
-from lib.preprocess import get_data
+from lib.preprocess import load_data
 from lib.local_utils import is_worse, SeqDataset
 
 
@@ -35,7 +35,7 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
-x_train, x_test, y_train, y_test = get_data(
+x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 diridx = 0

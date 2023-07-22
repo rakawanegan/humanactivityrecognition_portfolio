@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from lib.preprocess import get_data
+from lib.preprocess import load_data
 
 MODEL_NAME = "cnn1d_tf"
 print(MODEL_NAME)
@@ -34,7 +34,7 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
-x_train, x_test, y_train, y_test = get_data(
+x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
 )
 
