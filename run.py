@@ -16,7 +16,7 @@ def parse_args():
 def main():
     fetch = run_command("python3 setup.py")
     print(fetch)
-    pip = run_command("pip3 install -r requirements.txt")
+    # pip = run_command("pip3 install -r requirements.txt")
     args = parse_args()
     date = datetime.datetime.now().strftime("%m%d")
     idx = 0
