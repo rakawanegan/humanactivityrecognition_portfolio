@@ -52,7 +52,8 @@ def data_to_csv():
 
 def main():
     if not os.path.exists("./data/WISDM_ar_v1.1.csv"):
-            fetch_data()
-            data_to_csv()
+        fetch_data()
+        data_to_csv()
+        print("data fetched & formatted")
     else:
         print("data already exists skip fetching & formatting")
