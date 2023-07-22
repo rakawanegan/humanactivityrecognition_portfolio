@@ -45,8 +45,8 @@ def data_to_csv():
             for idx in range(len(data) // 6):
                 writer.writerow(data[6 * idx : 6 * idx + 6])
 
-    data = _read_csv("../data/WISDM_ar_v1.1_raw.txt")
-    _write_csv("../data/WISDM_ar_v1.1.csv", data)
+    data = _read_csv("./data/WISDM_ar_v1.1_raw.txt")
+    _write_csv("./data/WISDM_ar_v1.1.csv", data)
 
 
 def main():
@@ -56,3 +56,6 @@ def main():
         print("data fetched & formatted")
     else:
         print("data already exists skip fetching & formatting")
+
+if __name__ == "__main__":
+    main()
