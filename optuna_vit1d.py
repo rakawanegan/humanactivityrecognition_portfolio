@@ -173,7 +173,7 @@ def obj(trial):
 study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
 print(study.best_trial)
-joblib.dump(study, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/study.pkl")
+joblib.dump(study, f"{dirname}/raw/study.pkl")
 
 all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
@@ -231,7 +231,7 @@ plt.ylabel("Loss mean")
 plt.savefig(f"{dirname}/processed/assets/loss.png")
 
 model.eval()
-joblib.dump(model, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/model.pkl")
+joblib.dump(model, f"{dirname}/raw/model.pkl")
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
@@ -245,7 +245,7 @@ y_test = y_test.argmax(axis=-1)
 
 predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
-predict.to_csv(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/predict.csv")
+predict.to_csv(f"{dirname}/raw/predict.csv")
 
 print("Model's state_dict:")
 for param_tensor in model.state_dict():
@@ -274,4 +274,4 @@ param["MAX_EPOCH"] = MAX_EPOCH
 param["BATCH_SIZE"] = BATCH_SIZE
 param["TIMEOUT_HOURS"] = TIMEOUT_HOURS
 
-joblib.dump(param, f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}/raw/param.pkl")
+joblib.dump(param, f"{dirname}/raw/param.pkl")
