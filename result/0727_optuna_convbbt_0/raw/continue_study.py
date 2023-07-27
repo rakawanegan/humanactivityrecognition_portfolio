@@ -85,97 +85,11 @@ convbbt_searchspace = {
 search_space = adam_searchspace | calr_searchspace | convbbt_searchspace
 print("Search Space: ", search_space)
 
-
-def obj(trial):
-    adam_params = {
-        "lr": trial.suggest_categorical("lr", search_space["lr"]),
-        "betas": (
-            trial.suggest_categorical("beta1", search_space["beta1"]),
-            trial.suggest_categorical("beta2", search_space["beta2"]),
-        ),
-        "eps": trial.suggest_categorical("eps", search_space["eps"]),
-    }
-    calr_params = {
-        "T_max": trial.suggest_categorical("T_max", search_space["T_max"]),
-        "eta_min": trial.suggest_categorical("eta_min", search_space["eta_min"]),
-    }
-    conbbbt_params = {
-        "num_classes": len(LABELS),
-        "input_dim": TIME_PERIODS,
-        "channels": N_FEATURES,
-        "hidden_dim": trial.suggest_categorical(
-            "hidden_dim", search_space["hidden_dim"]
-        ),
-        "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
-        "depth": trial.suggest_categorical("depth", search_space["depth"]),
-        "heads": trial.suggest_categorical("heads", search_space["heads"]),
-        "mlp_dim": trial.suggest_categorical("mlp_dim", search_space["mlp_dim"]),
-        "dropout": trial.suggest_categorical("dropout", search_space["dropout"]),
-        "emb_dropout": trial.suggest_categorical(
-            "emb_dropout", search_space["emb_dropout"]
-        ),
-    }
-    train_loader = DataLoader(
-        train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
-    )
-    test_loader = DataLoader(
-        test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
-    )
-    criterion = nn.CrossEntropyLoss()
-    model = PreConvTransformer(**conbbbt_params).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), **adam_params)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
-
-    losslist = list()
-    opbest_model = copy.deepcopy(model)
-    for ep in range(MAX_EPOCH):
-        losses = list()
-        for i, (inputs, labels) in enumerate(train_loader):
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            losses.append(loss.item())
-            loss.backward()
-            optimizer.step()
-        ls = np.mean(losses)
-        scheduler.step()
-        if ep > calr_params["T_max"]:
-            if min(losslist) > ls:
-                opbest_model = copy.deepcopy(model)
-            if is_worse(losslist, REF_SIZE, "minimize"):
-                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-                break
-        print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
-        losslist.append(ls)
-    model = opbest_model
-
-    accuracies = list()
-    model.eval()
-    with torch.no_grad():
-        for inputs, labels in test_loader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            outputs = model(inputs)
-            accuracies.append(
-                accuracy_score(
-                    outputs.detach().cpu().numpy().argmax(axis=-1),
-                    labels.cpu().numpy().argmax(axis=-1),
-                )
-            )
-    accuracy = np.mean(accuracies)
-    print(f"Accuracy: {accuracy}")
-    return accuracy
-
-
-study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
-study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
-print(study.best_trial)
-joblib.dump(study, f"{dirname}/raw/study.pkl")
+study = joblib.load(f"{dirname}/study.pkl")
 
 all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
+adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
 convbbt_params = {k: all_params[k] for k in convbbt_searchspace.keys()}
 convbbt_params["input_dim"] = TIME_PERIODS
