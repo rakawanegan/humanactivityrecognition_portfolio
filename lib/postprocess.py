@@ -69,7 +69,7 @@ def generate_experiment_memo(dir:str, date, experiment_info:dict):
 
     create_experiment_memo(dir, memo_content)
 
-def result_process(dirname):
+def post_process(dirname):
     path = os.path.join(dirname, "raw/")
     param = joblib.load(os.path.join(path, "param.pkl"))
     hparam_names = create_study(dirname)
@@ -101,19 +101,16 @@ def result_process(dirname):
     plt.xlabel("Predicted label")
     plt.savefig(f"{dirname}/processed/assets/cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
-    time_diff = (param["end date"] - param["start date"]).total_seconds()
+    time_diff = (param["end_date"] - param["start_date"]).total_seconds()
     execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
     hparam_picdirs = {name: f"./assets/{name}.png" for name in hparam_names} if hparam_names is not None else None
     content = {
-        "Model name": param.pop("MODEL NAME"),
-        "Start date": param.pop("start date"),
-        "End date": param.pop("end date"),
+        "Model name": param.pop("MODEL_NAME"),
+        "Start date": param.pop("start_date"),
+        "End date": param.pop("end_date"),
         "Execution time": execution_time,
         "Report": convert_to_markdown_table(report),
         "Optuna search space": '\n'.join([f'- {key}: {"".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if search_space is not None else None,
-        "Adam param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.pop("Adam params").items()]),
-        "CosineAnnealingLRScheduler param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.pop("CosineAnnealingLRScheduler params").items()]),
-        "Model param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.pop("Model params").items()]),
         "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
         "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
         "Confusion_matrix": "![alt](./assets/cross-tab.png)",

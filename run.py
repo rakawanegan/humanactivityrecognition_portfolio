@@ -2,7 +2,7 @@ import argparse
 import datetime
 import os
 
-from lib.result_process import result_process as rp
+from lib.postprocess import post_process as pp
 from lib.local_utils import send_email, run_command
 
 
@@ -35,7 +35,7 @@ def main():
         f"python3 {args.path}.py > {dirname}/raw/experiment.log"
     )
     print("main done")
-    rp(dirname)
+    pp(dirname)
     print("result done")
     print(f"{date}_{args.path}_{idx} done")
     send_email(f"{date}_{args.path}_{idx} done", f"{date}_{args.path}_{idx} is done")
