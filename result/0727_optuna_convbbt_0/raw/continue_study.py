@@ -82,7 +82,7 @@ convbbt_searchspace = {
 search_space = adam_searchspace | calr_searchspace | convbbt_searchspace
 print("Search Space: ", search_space)
 
-study = joblib.load(f"{dirname}/study.pkl")
+study = joblib.load(f"{dirname}/raw/study.pkl")
 
 all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
