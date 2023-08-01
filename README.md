@@ -82,6 +82,8 @@ python3 run.py --path [py file name]
 │           ├── param.pkl: experiment feature dict object
 │           ├── model.pkl: pre-trained model object written in Pytorch
 │           ├── study.pkl: optuna's study object
+│           ├── x_test.pkl: test input data
+│           ├── y_test.pkl: test answer data
 │           └── predict.csv: contain index, predict value, answer value
 └── run.py: run script
 </pre>

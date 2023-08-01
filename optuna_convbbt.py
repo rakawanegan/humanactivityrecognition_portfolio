@@ -247,6 +247,9 @@ for batch in test_loader:
 y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
+joblib.dump(y_test, f"{dirname}/raw/y_test.pkl")
+joblib.dump(x_test, f"{dirname}/raw/x_test.pkl")
+
 predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
 predict.to_csv(f"{dirname}/raw/predict.csv")
