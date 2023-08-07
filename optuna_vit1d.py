@@ -171,7 +171,8 @@ def obj(trial):
 
 
 study = optuna.create_study(direction="maximize", sampler=optuna.samplers.TPESampler(seed=SEED))
-study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
+# study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
+study.optimize(obj, n_trials=1000)
 print(study.best_trial)
 joblib.dump(study, f"{dirname}/raw/study.pkl")
 
