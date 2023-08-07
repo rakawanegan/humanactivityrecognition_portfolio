@@ -179,6 +179,7 @@ all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
 calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
 vit_params = {k: all_params[k] for k in vit_searchspace.keys()}
+adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 vit_params["seq_len"] = TIME_PERIODS
 vit_params["num_classes"] = len(LABELS)
 vit_params["channels"] = N_FEATURES

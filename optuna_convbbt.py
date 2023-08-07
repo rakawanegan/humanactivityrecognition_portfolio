@@ -178,6 +178,7 @@ all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
 calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
 convbbt_params = {k: all_params[k] for k in convbbt_searchspace.keys()}
+adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 convbbt_params["input_dim"] = TIME_PERIODS
 convbbt_params["num_classes"] = len(LABELS)
 convbbt_params["channels"] = N_FEATURES
