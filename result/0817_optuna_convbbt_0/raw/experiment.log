@@ -1,0 +1,6 @@
+MODEL_NAME:  optuna_convbbt
+Start time:  2023-08-17 11:30:29.901768
+Device:  cuda
+Max Epochs:  200
+Early Stopping Reference Size:  5
+Search Space:  {'lr': [1e-06, 1e-05, 0.0001, 0.001], 'beta1': [0.9, 0.95, 0.99, 0.999], 'beta2': [0.9, 0.95, 0.99, 0.999], 'eps': [1e-09, 1e-08, 1e-07, 1e-06], 'T_max': [50, 100, 150, 200], 'eta_min': [0, 1e-08, 1e-07, 1e-06, 1e-05], 'hidden_ch': [3, 5, 7, 8, 10, 15], 'depth': [3, 5, 6, 8], 'heads': [3, 5, 6, 8, 10], 'hidden_dim': [64, 128, 256, 512, 1024], 'mlp_dim': [256, 512, 1024, 2048], 'dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'emb_dropout': [0.01, 0.1, 0.25, 0.5, 0.8]}
