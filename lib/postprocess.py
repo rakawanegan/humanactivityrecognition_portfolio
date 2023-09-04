@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import subprocess
+import optuna
 
 
 def run_command(command):
@@ -35,24 +36,15 @@ def create_study(dirname: str) -> list:
     if os.path.exists(os.path.join(dirname, "raw", "study.pkl")):
         return None
     study = joblib.load(os.path.join(dirname, "raw", "study.pkl"))
+
+    importtance_fig = optuna.visualization.matplotlib.plot_param_importances(study)
+    importtance_fig.figure.savefig(os.path.join(dirname, "processed/assets",'optimization_importance.png'), bbox_inches='tight')
+
+    histry_fig = optuna.visualization.matplotlib.plot_optimization_history(study)
+    histry_fig.figure.savefig(os.path.join(dirname, "processed/assets",'optimization_history.png'), bbox_inches='tight')
+
     best_trial = study.best_trial
     param_keys = list(best_trial.params.keys())
-    param_values = {key: list() for key in param_keys}
-    scores = list()
-
-    for trial in study.trials:
-        for key in param_keys:
-            param_values[key].append(trial.params[key])
-        scores.append(trial.value)
-
-    # show scatter
-    for key in param_keys:
-        plt.figure()
-        plt.scatter(param_values[key], scores, s=8)
-        plt.xlabel(key)
-        plt.ylabel("score")
-        plt.savefig(os.path.join(dirname, "processed/assets", f"{key}.png"))
-        plt.close()
     return param_keys
 
 def create_experiment_memo(dir, content):
@@ -103,7 +95,7 @@ def post_process(dirname):
     report = classification_report(y_test, y_pred, target_names=LABELS)
     time_diff = (param["end_date"] - param["start_date"]).total_seconds()
     execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
-    hparam_picdirs = {name: f"./assets/{name}.png" for name in hparam_names} if hparam_names is not None else None
+    hparam_picdirs = [os.path.join(dirname, "processed/assets",f'optimization_{name}.png') for name in ["history", "importance"]] if hparam_names is not None else None
     content = {
         "Model name": param.pop("MODEL_NAME"),
         "Start date": param.pop("start_date"),
@@ -115,7 +107,7 @@ def post_process(dirname):
         "Model size": run_command(f'stat {os.path.join(path, "model.pkl")} | grep Size').split('\t')[0] + " B",
         "Confusion_matrix": "![alt](./assets/cross-tab.png)",
         "Loss curve": "![alt](./assets/loss.png)",
-        "Hyper parameter plots": '\n'.join([f'### {key}\n: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in hparam_picdirs.items()]) if hparam_picdirs is not None else None,
+        "optuna search plots": '\n'.join(hparam_picdirs) if hparam_picdirs is not None else None,
     }
 
     generate_experiment_memo(f"{dirname}/processed/", content["Start date"], content)
