@@ -30,7 +30,19 @@ optuna_convbbt
 
 
 ## Optuna search space
-None
+- lr: [1e-06, 1e-05, 0.0001, 0.001]
+- beta1: [0.9, 0.95, 0.99, 0.999]
+- beta2: [0.9, 0.95, 0.99, 0.999]
+- eps: [1e-09, 1e-08, 1e-07, 1e-06]
+- T_max: [50, 100, 150, 200]
+- eta_min: [0, 1e-08, 1e-07, 1e-06, 1e-05]
+- hidden_ch: [3, 5, 7, 8, 10, 15]
+- depth: [3, 5, 6, 8]
+- heads: [3, 5, 6, 8, 10]
+- hidden_dim: [64, 128, 256, 512, 1024]
+- mlp_dim: [256, 512, 1024, 2048]
+- dropout: [0.01, 0.1, 0.25, 0.5, 0.8]
+- emb_dropout: [0.01, 0.1, 0.25, 0.5, 0.8]
 
 ## Feature param
 - LABELS: Downstairs, Jogging, Sitting, Standing, Upstairs, Walking
@@ -39,7 +51,6 @@ None
 - N_FEATURES: 3
 - LABEL: ActivityEncoded
 - SEED: 314
-- search_space: {'lr': [1e-06, 1e-05, 0.0001, 0.001], 'beta1': [0.9, 0.95, 0.99, 0.999], 'beta2': [0.9, 0.95, 0.99, 0.999], 'eps': [1e-09, 1e-08, 1e-07, 1e-06], 'T_max': [50, 100, 150, 200], 'eta_min': [0, 1e-08, 1e-07, 1e-06, 1e-05], 'hidden_ch': [3, 5, 7, 8, 10, 15], 'depth': [3, 5, 6, 8], 'heads': [3, 5, 6, 8, 10], 'hidden_dim': [64, 128, 256, 512, 1024], 'mlp_dim': [256, 512, 1024, 2048], 'dropout': [0.01, 0.1, 0.25, 0.5, 0.8], 'emb_dropout': [0.01, 0.1, 0.25, 0.5, 0.8]}
 - TIMEOUT_HOURS: 10
 
 ## Model size
@@ -52,4 +63,5 @@ Size: 7480209    B
 ![alt](./assets/loss.png)
 
 ## optuna search plots
-None
+result/0904_optuna_convbbt_2/processed/assets/optimization_history.png
+result/0904_optuna_convbbt_2/processed/assets/optimization_importance.png
