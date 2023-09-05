@@ -118,10 +118,10 @@ def obj(trial):
     sampling_weight = np.array([1.0] * len(LABELS))
     sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
     train_loader = DataLoader(
-        train, sampler=sampler, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+        train, sampler=sampler, batch_size=BATCH_SIZE, num_workers=os.cpu_count()
     )
     test_loader = DataLoader(
-        test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
+        test, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
     )
     criterion = nn.CrossEntropyLoss()
     model = PreConvTransformer(**conbbbt_params).to(device)
@@ -200,10 +200,10 @@ test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).flo
 sampling_weight = np.array([1.0] * len(LABELS))
 sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
 train_loader = DataLoader(
-    train, sampler=sampler, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+    train, sampler=sampler, batch_size=BATCH_SIZE, num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
-    test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
+    test, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
 loss_list = list()
 
