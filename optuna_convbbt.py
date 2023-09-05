@@ -10,7 +10,7 @@ import torch
 from matplotlib import pyplot as plt
 from sklearn.metrics import accuracy_score
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
 from lib.model import PreConvTransformer
 from lib.preprocess import load_data
@@ -115,8 +115,10 @@ def obj(trial):
             "emb_dropout", search_space["emb_dropout"]
         ),
     }
+    sampling_weight = np.array([1.0] * len(LABELS))
+    sampler = WeightedRandomSampler(weights=sampling_weight, n_classes=len(LABELS), replacement=True)
     train_loader = DataLoader(
-        train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+        train, sampler=sampler, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
     )
     test_loader = DataLoader(
         test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
@@ -192,8 +194,13 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
+
+# LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
+# sampling_weight = np.array([0.091, 0.312, 0.055, 0.044, 0.112, 0.386])
+sampling_weight = np.array([1.0] * len(LABELS))
+sampler = WeightedRandomSampler(weights=sampling_weight, n_classes=len(LABELS), replacement=True)
 train_loader = DataLoader(
-    train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+    train, sampler=sampler, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
