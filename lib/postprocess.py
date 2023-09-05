@@ -95,7 +95,7 @@ def post_process(dirname):
     report = classification_report(y_test, y_pred, target_names=LABELS)
     time_diff = (param["end_date"] - param["start_date"]).total_seconds()
     execution_time = f"{int(time_diff // 3600)} hours {int((time_diff % 3600) // 60)} minutes {int(time_diff % 60)} seconds"
-    hparam_picdirs = [f"![]({os.path.join(dirname, 'processed/assets',f'optimization_{name}.png')})" for name in ["history", "importance"]] if hparam_names is not None else None
+    hparam_picdirs = [f"![]({os.path.join('./assets',f'optimization_{name}.png')})" for name in ["history", "importance"]] if hparam_names is not None else None
     content = {
         "Model name": param.pop("MODEL_NAME"),
         "Start date": param.pop("start_date"),
