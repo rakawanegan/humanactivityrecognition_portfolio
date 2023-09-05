@@ -116,7 +116,7 @@ def obj(trial):
         ),
     }
     sampling_weight = np.array([1.0] * len(LABELS))
-    sampler = WeightedRandomSampler(weights=sampling_weight, n_classes=len(LABELS), replacement=True)
+    sampler = WeightedRandomSampler(weights=sampling_weight, replacement=True)
     train_loader = DataLoader(
         train, sampler=sampler, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
     )
@@ -198,7 +198,7 @@ test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).flo
 # LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
 # sampling_weight = np.array([0.091, 0.312, 0.055, 0.044, 0.112, 0.386])
 sampling_weight = np.array([1.0] * len(LABELS))
-sampler = WeightedRandomSampler(weights=sampling_weight, n_classes=len(LABELS), replacement=True)
+sampler = WeightedRandomSampler(weights=sampling_weight, replacement=True)
 train_loader = DataLoader(
     train, sampler=sampler, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
 )
