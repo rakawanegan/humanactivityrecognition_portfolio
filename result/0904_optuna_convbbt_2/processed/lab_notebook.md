@@ -63,5 +63,5 @@ Size: 7480209    B
 ![alt](./assets/loss.png)
 
 ## optuna search plots
-![](result/0904_optuna_convbbt_2/processed/assets/optimization_history.png)
-![](result/0904_optuna_convbbt_2/processed/assets/optimization_importance.png)
+![](./assets/optimization_history.png)
+![](./assets/optimization_importance.png)
