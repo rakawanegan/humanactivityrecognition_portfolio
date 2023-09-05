@@ -33,7 +33,7 @@ def convert_to_markdown_table(input_string):
     return table
 
 def create_study(dirname: str) -> list:
-    if os.path.exists(os.path.join(dirname, "raw", "study.pkl")):
+    if not os.path.exists(os.path.join(dirname, "raw", "study.pkl")):
         return None
     study = joblib.load(os.path.join(dirname, "raw", "study.pkl"))
 
