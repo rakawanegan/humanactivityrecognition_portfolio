@@ -33,19 +33,20 @@ def convert_to_markdown_table(input_string):
     return table
 
 def create_study(dirname: str) -> list:
-    if not os.path.exists(os.path.join(dirname, "raw", "study.pkl")):
+    if "optuna" in dirname:
+        study = optuna.load_study(study_name=dirname, storage=f"sqlite:///{dirname}/raw/optuna.db")
+
+        importtance_fig = optuna.visualization.matplotlib.plot_param_importances(study)
+        importtance_fig.figure.savefig(os.path.join(dirname, "processed/assets",'optimization_importance.png'), bbox_inches='tight')
+
+        histry_fig = optuna.visualization.matplotlib.plot_optimization_history(study)
+        histry_fig.figure.savefig(os.path.join(dirname, "processed/assets",'optimization_history.png'), bbox_inches='tight')
+
+        best_trial = study.best_trial
+        param_keys = list(best_trial.params.keys())
+        return param_keys
+    else:
         return None
-    study = joblib.load(os.path.join(dirname, "raw", "study.pkl"))
-
-    importtance_fig = optuna.visualization.matplotlib.plot_param_importances(study)
-    importtance_fig.figure.savefig(os.path.join(dirname, "processed/assets",'optimization_importance.png'), bbox_inches='tight')
-
-    histry_fig = optuna.visualization.matplotlib.plot_optimization_history(study)
-    histry_fig.figure.savefig(os.path.join(dirname, "processed/assets",'optimization_history.png'), bbox_inches='tight')
-
-    best_trial = study.best_trial
-    param_keys = list(best_trial.params.keys())
-    return param_keys
 
 def create_experiment_memo(dir, content):
     file_name = os.path.join(dir, "lab_notebook.md")
