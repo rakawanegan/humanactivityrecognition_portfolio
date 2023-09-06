@@ -115,7 +115,11 @@ def obj(trial):
             "emb_dropout", search_space["emb_dropout"]
         ),
     }
-    sampling_weight = np.array([1.0] * len(LABELS))
+    # LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
+    # sampling_weight = np.array([0.091, 0.312, 0.055, 0.044, 0.112, 0.386])
+    # sampling_weight = np.array([1.0] * len(LABELS))
+    weight_from_result = [1.5, 1.0, 1.0, 1.0, 1.5, 1.5]
+    sampling_weight = np.array(weight_from_result)/np.sum(weight_from_result)
     sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
     train_loader = DataLoader(
         train, sampler=sampler, batch_size=BATCH_SIZE, num_workers=os.cpu_count()
@@ -197,7 +201,9 @@ test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).flo
 
 # LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
 # sampling_weight = np.array([0.091, 0.312, 0.055, 0.044, 0.112, 0.386])
-sampling_weight = np.array([1.0] * len(LABELS))
+# sampling_weight = np.array([1.0] * len(LABELS))
+weight_from_result = [1.5, 1.0, 1.0, 1.0, 1.5, 1.5]
+sampling_weight = np.array(weight_from_result)/np.sum(weight_from_result)
 sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
 train_loader = DataLoader(
     train, sampler=sampler, batch_size=BATCH_SIZE, num_workers=os.cpu_count()
