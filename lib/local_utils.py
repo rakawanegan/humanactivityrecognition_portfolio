@@ -3,10 +3,14 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 import configparser
 import subprocess
-import joblib
 import matplotlib.pyplot as plt
 import os
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import TensorDataset
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+import os
+import string
 
 def run_command(command):
     try:
@@ -69,3 +73,30 @@ class SeqDataset(TensorDataset):
 
     def __getitem__(self, idx):
         return self.x[idx], self.y[idx]
+
+
+
+def plot_activity(activity, data):
+
+    def _plot_axis(ax, x, y, title):
+        ax.plot(x, y, 'r')
+        ax.set_title(title)
+        ax.xaxis.set_visible(False)
+        ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
+        ax.set_xlim([min(x), max(x)])
+        ax.grid(True)
+
+    fig, (ax0, ax1, ax2) = plt.subplots(nrows=3,
+        figsize=(15, 10),
+        sharex=True)
+    time_steps = np.linspace(0, 4, num=data.shape[0])
+    _plot_axis(ax0, time_steps, data[:,0], 'X-Axis')
+    _plot_axis(ax1, time_steps, data[:,1], 'Y-Axis')
+    _plot_axis(ax2, time_steps, data[:,2], 'Z-Axis')
+    plt.subplots_adjust(hspace=0.2)
+    fig.suptitle(activity)
+    plt.subplots_adjust(top=0.90)
+    os.makedirs(f"processed/assets/miss_activity_plots", exist_ok=True)
+    # plt.savefig(f"./result/{name}/raw/miss_activity_plots/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
+    plt.savefig(f"processed/assets/miss_activity_plots/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
+    # plt.show()

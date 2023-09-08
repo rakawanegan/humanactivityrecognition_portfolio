@@ -254,10 +254,7 @@ plt.savefig(f"{dirname}/processed/assets/loss.png")
 
 
 model.eval()
-torch.save(
-    model.to('cpu').state_dict(),
-    f"{dirname}/raw/model.pt"
-)
+
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
@@ -268,6 +265,11 @@ for batch in test_loader:
 
 y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
+
+torch.save(
+    model.to('cpu').state_dict(),
+    f"{dirname}/raw/model.pt"
+)
 
 torch.save(y_test, f"{dirname}/raw/y_test.tsr")
 torch.save(x_test, f"{dirname}/raw/x_test.tsr")
