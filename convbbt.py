@@ -40,11 +40,11 @@ diridx -= 1
 dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 
 x_train, x_test, y_train, y_test = load_data(
-    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
+    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 
 # Hyperparameters
-MAX_EPOCH = 500
+MAX_EPOCH = 200
 BATCH_SIZE = 128
 REF_SIZE = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -63,8 +63,8 @@ adm_params = {
 }
 
 calr_params = {
-    "T_max": 200,
-    "eta_min": 0,
+    "T_max": 150,
+    "eta_min": 1e-05,
     "last_epoch": -1,
     "verbose": False,
 }
