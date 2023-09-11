@@ -105,7 +105,7 @@ def post_process(dirname):
         "Report": convert_to_markdown_table(report),
         "Optuna search space": '\n'.join([f'- {key}: {"".join(str(value)) if isinstance(value, list) else str(value)}' for key, value in search_space.items()]) if search_space is not None else None,
         "Feature param": '\n'.join([f'- {key}: {", ".join(value) if isinstance(value, list) else str(value)}' for key, value in param.items()]),
-        "Model size": run_command(f'stat {os.path.join(path, ".model.pt")} | grep Size').split('\t')[0] + " B",
+        "Model size": run_command(f'stat {os.path.join(path, "model.pt")} | grep Size').split('\t')[0] + " B",
         "Confusion_matrix": "![alt](./assets/cross-tab.png)",
         "Loss curve": "![alt](./assets/loss.png)",
         "optuna search plots": '\n'.join(hparam_picdirs) if hparam_picdirs is not None else None,
