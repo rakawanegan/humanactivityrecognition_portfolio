@@ -67,10 +67,10 @@ adam_searchspace = {
     "eps": [1e-9, 1e-8, 1e-7, 1e-6],
 }
 
-calr_searchspace = {
-    "T_max": [50, 100, 150, 200],
-    "eta_min": [0, 1e-8, 1e-7, 1e-6, 1e-5],
-}
+# calr_searchspace = {
+#     "T_max": [50, 100, 150, 200],
+#     "eta_min": [0, 1e-8, 1e-7, 1e-6, 1e-5],
+# }
 
 convbbt_searchspace = {
     "hidden_ch": [3, 5, 7, 8, 10, 15],
@@ -82,7 +82,7 @@ convbbt_searchspace = {
     "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
 }
 
-search_space = adam_searchspace | calr_searchspace | convbbt_searchspace
+search_space = adam_searchspace | convbbt_searchspace# | calr_searchspace
 print("Search Space: ", search_space)
 
 
@@ -95,10 +95,10 @@ def obj(trial):
         ),
         "eps": trial.suggest_categorical("eps", search_space["eps"]),
     }
-    calr_params = {
-        "T_max": trial.suggest_categorical("T_max", search_space["T_max"]),
-        "eta_min": trial.suggest_categorical("eta_min", search_space["eta_min"]),
-    }
+    # calr_params = {
+    #     "T_max": trial.suggest_categorical("T_max", search_space["T_max"]),
+    #     "eta_min": trial.suggest_categorical("eta_min", search_space["eta_min"]),
+    # }
     conbbbt_params = {
         "num_classes": len(LABELS),
         "input_dim": TIME_PERIODS,
@@ -133,7 +133,7 @@ def obj(trial):
     criterion = nn.CrossEntropyLoss()
     model = PreConvTransformer(**conbbbt_params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), **adam_params)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
     losslist = list()
     opbest_model = copy.deepcopy(model)
@@ -149,13 +149,13 @@ def obj(trial):
             loss.backward()
             optimizer.step()
         ls = np.mean(losses)
-        scheduler.step()
-        if ep > calr_params["T_max"]:
-            if min(losslist) > ls:
-                opbest_model = copy.deepcopy(model)
-            if is_worse(losslist, REF_SIZE, "minimize"):
-                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-                break
+        # scheduler.step()
+        # if ep > calr_params["T_max"]:
+        if min(losslist) > ls:
+            opbest_model = copy.deepcopy(model)
+        if is_worse(losslist, REF_SIZE, "minimize"):
+            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+            break
         print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
         losslist.append(ls)
     model = opbest_model
@@ -192,7 +192,7 @@ joblib.dump(study, f"{dirname}/raw/study.pkl")
 
 all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
-calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
+# calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
 convbbt_params = {k: all_params[k] for k in convbbt_searchspace.keys()}
 adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
 convbbt_params["input_dim"] = TIME_PERIODS
@@ -202,7 +202,7 @@ convbbt_params["channels"] = N_FEATURES
 loss_function = nn.CrossEntropyLoss()
 model = PreConvTransformer(**convbbt_params).to(device)
 optimizer = torch.optim.Adam(model.parameters(), **adam_params)
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
+# scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
@@ -240,14 +240,14 @@ for ep in range(1, MAX_EPOCH + 1):
         loss.backward()
         optimizer.step()
         losses.append(loss.item())
-    scheduler.step()
+    # scheduler.step()
     ls = np.mean(losses)
-    if ep > calr_params["T_max"]:
-        if min(loss_list) > ls:
-            best_model = copy.deepcopy(model)
-        if is_worse(loss_list, REF_SIZE, "minimize"):
-            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-            break
+    # if ep > calr_params["T_max"]:
+    if min(loss_list) > ls:
+        best_model = copy.deepcopy(model)
+    if is_worse(loss_list, REF_SIZE, "minimize"):
+        print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+        break
     print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
     loss_list.append(ls)
 model = best_model
