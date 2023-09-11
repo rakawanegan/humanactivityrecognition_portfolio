@@ -122,7 +122,10 @@ def obj(trial):
     sampling_weight = np.array(weight_from_result)/np.sum(weight_from_result)
     sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
     train_loader = DataLoader(
-        train, sampler=sampler, batch_size=BATCH_SIZE, num_workers=os.cpu_count()
+        train,
+        # sampler=sampler,
+        batch_size=BATCH_SIZE,
+        num_workers=os.cpu_count()
     )
     test_loader = DataLoader(
         test, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
@@ -212,7 +215,10 @@ weight_from_result = [1.5, 1.0, 1.0, 1.0, 1.5, 1.5]
 sampling_weight = np.array(weight_from_result)/np.sum(weight_from_result)
 sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
 train_loader = DataLoader(
-    train, sampler=sampler, batch_size=BATCH_SIZE, num_workers=os.cpu_count()
+    train,
+    # sampler=sampler,
+    batch_size=BATCH_SIZE,
+    num_workers=os.cpu_count()
 )
 test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
