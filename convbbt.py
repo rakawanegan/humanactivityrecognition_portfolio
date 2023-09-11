@@ -114,7 +114,7 @@ for ep in range(1, MAX_EPOCH + 1):
         loss.backward()
         optimizer.step()
         losses.append(loss.item())
-    scheduler.step()
+    # scheduler.step()
     ls = np.mean(losses)
     if ep > calr_params["T_max"]:
         if min(losslist) > ls:
