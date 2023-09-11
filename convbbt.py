@@ -178,20 +178,20 @@ print("Total time: ", end_date - start_date)
 
 
 param = dict()
-param["MODEL NAME"] = MODEL_NAME
-param["start date"] = start_date
-param["end date"] = end_date
+param["MODEL_NAME"] = MODEL_NAME
+param["start_date"] = start_date
+param["end_date"] = end_date
 param["LABELS"] = LABELS
-param["TIME PERIODS"] = TIME_PERIODS
-param["STEP DISTANCE"] = STEP_DISTANCE
-param["N FEATURES"] = N_FEATURES
+param["TIME_PERIODS"] = TIME_PERIODS
+param["STEP_DISTANCE"] = STEP_DISTANCE
+param["N_FEATURES"] = N_FEATURES
 param["LABEL"] = LABEL
 param["SEED"] = SEED
-param["MAX EPOCH"] = MAX_EPOCH
-param["BATCH SIZE"] = BATCH_SIZE
-param["REF SIZE"] = REF_SIZE
-param["Adam params"] = adm_params
-param["CosineAnnealingLRScheduler params"] = calr_params
-param["Model params"] = pct_params
+param["MAX_EPOCH"] = MAX_EPOCH
+param["BATCH_SIZE"] = BATCH_SIZE
+param["REF_SIZE"] = REF_SIZE
+param["Adam_params"] = adm_params
+param["CosineAnnealingLRScheduler_params"] = calr_params
+param["Model_params"] = pct_params
 
 joblib.dump(param, f"{dirname}/raw/param.pkl")
