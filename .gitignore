@@ -1,6 +1,7 @@
 data/
 lib/__pycache__/
 result/*/raw/model.pkl
+result/*/raw/model.pt
 result/*/raw/lib/__pycache__/
 config.ini
 local/
