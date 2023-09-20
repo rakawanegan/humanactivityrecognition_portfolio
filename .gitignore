@@ -5,3 +5,4 @@ result/*/raw/model.pt
 result/*/raw/lib/__pycache__/
 config.ini
 local/
+result_analysis.ipynb
