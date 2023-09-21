@@ -39,7 +39,7 @@ def main():
     pp(dirname)
     print("result done")
     print(f"{date}_{args.path}_{idx} done")
-    send_email(f"{date}_{args.path}_{idx} done", f"{date}_{args.path}_{idx} is done")
+    # send_email(f"{date}_{args.path}_{idx} done", f"{date}_{args.path}_{idx} is done")
     if args.git == "push":
         gita = run_command(f"git add .")
         print("git add")
