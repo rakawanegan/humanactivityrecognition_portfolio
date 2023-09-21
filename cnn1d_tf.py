@@ -35,7 +35,7 @@ LABEL = "ActivityEncoded"
 SEED = 314
 
 x_train, x_test, y_train, y_test = load_data(
-    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES
+    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 
 model = Sequential()
