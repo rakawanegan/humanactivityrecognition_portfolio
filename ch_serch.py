@@ -95,6 +95,8 @@ def obj(trial):
         "dropout": 0.01,
         "emb_dropout": 0.01,
     }
+    print("channel: ", conbbbt_params["hidden_ch"])
+    print("hidden_dim: ", conbbbt_params["hidden_dim"])
     # LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
     # sampling_weight = np.array([0.091, 0.312, 0.055, 0.044, 0.112, 0.386])
     # sampling_weight = np.array([1.0] * len(LABELS))
@@ -135,9 +137,9 @@ def obj(trial):
             if min(losslist) > ls:
                 opbest_model = copy.deepcopy(model)
             if is_worse(losslist, REF_SIZE, "minimize"):
-                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+                # print(f"early stopping at epoch {ep} with loss {ls:.5f}")
                 break
-        print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
+        # print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
         losslist.append(ls)
     model = opbest_model
 
