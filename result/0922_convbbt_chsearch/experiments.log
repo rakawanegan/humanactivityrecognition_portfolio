@@ -1,0 +1,6 @@
+MODEL_NAME:  optuna_convbbt
+Start time:  2023-09-22 10:46:28.893323
+Device:  cuda
+Max Epochs:  200
+Early Stopping Reference Size:  5
+Search Space:  {'hidden_ch': [3, 5, 7, 8, 10, 15], 'hidden_dim': [64, 128, 256, 512, 1024]}
