@@ -61,8 +61,8 @@ train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
 convbbt_searchspace = {
-    "hidden_ch": [3, 5, 7, 8, 10, 15],
-    "hidden_dim": [64, 128, 256, 512, 1024],
+    "hidden_ch": [3, 5, 7, 8, 10, 12, 15, 18, 20, 25, 30, 40],
+    "hidden_dim": [32, 64, 128, 256, 512, 1024],
 }
 
 search_space = convbbt_searchspace# | adam_searchspace | calr_searchspace
