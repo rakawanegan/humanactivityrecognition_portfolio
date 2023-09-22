@@ -61,7 +61,7 @@ train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
 
 convbbt_searchspace = {
-    "hidden_ch": [3, 5, 7, 8, 10, 12, 15, 18, 20, 25, 30, 40],
+    "hidden_ch": [3, 5, 7, 8, 10, 12, 15, 18, 19, 20, 21, 22, 23, 24, 25, 30, 40, 50],
     "hidden_dim": [32, 64, 128, 256, 512, 1024],
 }
 
@@ -166,8 +166,8 @@ study = optuna.create_study(
                         # storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
                         load_if_exists=True,
                         )
-study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
-# study.optimize(obj, n_trials=1000)
+# study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
+study.optimize(obj, n_trials=100)
 print(study.best_trial)
 
 import sys

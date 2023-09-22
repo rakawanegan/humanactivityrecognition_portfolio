@@ -76,7 +76,7 @@ class SeqDataset(TensorDataset):
 
 
 
-def plot_activity(activity, data):
+def plot_activity(activity, data, savedir="processed/assets/miss_activity_plots"):
 
     def _plot_axis(ax, x, y, title):
         ax.plot(x, y, 'r')
@@ -96,7 +96,6 @@ def plot_activity(activity, data):
     plt.subplots_adjust(hspace=0.2)
     fig.suptitle(activity)
     plt.subplots_adjust(top=0.90)
-    os.makedirs(f"processed/assets/miss_activity_plots", exist_ok=True)
-    # plt.savefig(f"./result/{name}/raw/miss_activity_plots/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
-    plt.savefig(f"processed/assets/miss_activity_plots/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
+    # os.makedirs(savedir, exist_ok=True)
+    # plt.savefig(f"{savedir}/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
     # plt.show()
