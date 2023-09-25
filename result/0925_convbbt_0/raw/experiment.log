@@ -1,0 +1,8 @@
+MODEL_NAME:  convbbt
+Start time:  2023-09-25 12:41:33.968878
+Device:  cuda
+Max Epochs:  200
+Early Stopping Reference Size:  5
+Epoch 001: | Loss: 1.19758
+Estimated time: 0:25:02.543200
+Estimated finish: 2023-09-25 13:06:46.178307
