@@ -9,6 +9,7 @@ import torch
 from matplotlib import pyplot as plt
 from torch import nn, optim
 from torch.utils.data import DataLoader
+from einops import rearrange
 
 from lib.model import PreConvTransformer
 from lib.preprocess import load_data
@@ -43,8 +44,8 @@ x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 
-x_train = x_train.T
-x_test = x_test.T
+x_train = rearrange(x_train, "n d c -> n c d")
+x_test = rearrange(x_test, "n d c -> n c d")
 
 # Hyperparameters
 MAX_EPOCH = 200
