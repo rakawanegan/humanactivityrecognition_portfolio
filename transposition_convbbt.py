@@ -75,8 +75,8 @@ calr_params = {
 
 pct_params = {
     "num_classes": len(LABELS),
-    "input_dim": TIME_PERIODS,
-    "channels": N_FEATURES,
+    "input_dim": N_FEATURES,
+    "channels": TIME_PERIODS,
     "hidden_ch": 50,
     "hidden_dim": 10,
     "depth": 5,
