@@ -63,7 +63,7 @@ adm_params = {
 }
 
 calr_params = {
-    "T_max": 200,
+    "T_max": 150,
     "eta_min": 1e-05,
     "last_epoch": -1,
     "verbose": False,
