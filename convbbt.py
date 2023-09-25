@@ -128,10 +128,10 @@ for ep in range(1, MAX_EPOCH + 1):
         ep_delta = datetime.datetime.now() - ep_start
         print(f"Estimated time: {ep_delta * MAX_EPOCH}")
         print(f"Estimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}")
-        send_email(
-            "Training started",
-            f"Training started at {ep_start.strftime('%Y-%m-%d %H:%M:%S')}\nEstimated time: {ep_delta * MAX_EPOCH}\nEstimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}"
-        )
+        # send_email(
+        #     "Training started",
+        #     f"Training started at {ep_start.strftime('%Y-%m-%d %H:%M:%S')}\nEstimated time: {ep_delta * MAX_EPOCH}\nEstimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}"
+        # )
 model = best_model
 
 plt.plot(losslist)
