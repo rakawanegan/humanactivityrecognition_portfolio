@@ -49,7 +49,7 @@ dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 MAX_EPOCH = 200
 BATCH_SIZE = 128
 REF_SIZE = 5
-TIMEOUT_HOURS = 10
+TIMEOUT_HOURS = 24
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
@@ -78,8 +78,8 @@ adam_searchspace = {
 convbbt_searchspace = {
     "hidden_ch": [10, 20, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 90, 100],
     "hidden_dim": [1, 3, 4, 8, 12, 16, 20, 32, 64, 128,],
-    "depth": [3, 5, 6, 8],
-    "heads": [3, 5, 6, 8, 10],
+    "depth": [1, 3, 5, 6, 8],
+    "heads": [1, 3, 5, 6, 8, 10],
     "mlp_dim": [256, 512, 1024, 2048],
     "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
     "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
@@ -158,9 +158,9 @@ def obj(trial):
             if min(losslist) > ls:
                 opbest_model = copy.deepcopy(model)
             if is_worse(losslist, REF_SIZE, "minimize"):
-                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+                # print(f"early stopping at epoch {ep} with loss {ls:.5f}")
                 break
-        print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
+        # print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
         losslist.append(ls)
     model = opbest_model
 

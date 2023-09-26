@@ -1,5 +1,0 @@
-MODEL_NAME:  convbbt
-Start time:  2023-09-25 17:04:55.887498
-Device:  cuda
-Max Epochs:  200
-Early Stopping Reference Size:  5
