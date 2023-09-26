@@ -76,10 +76,10 @@ adam_searchspace = {
 # }
 
 convbbt_searchspace = {
-    "hidden_ch": [3, 5, 7, 8, 10, 15],
+    "hidden_ch": [10, 20, 30, 35, 40, 45, 50, 55, 60, 65, 70, 80, 90, 100],
+    "hidden_dim": [1, 3, 4, 8, 12, 16, 20, 32, 64, 128,],
     "depth": [3, 5, 6, 8],
     "heads": [3, 5, 6, 8, 10],
-    "hidden_dim": [64, 128, 256, 512, 1024],
     "mlp_dim": [256, 512, 1024, 2048],
     "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
     "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
@@ -199,9 +199,9 @@ adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
 # calr_params = {k: all_params[k] for k in calr_searchspace.keys()}
 convbbt_params = {k: all_params[k] for k in convbbt_searchspace.keys()}
 adam_params["betas"] = (adam_params.pop("beta1"), adam_params.pop("beta2"))
-convbbt_params["input_dim"] = TIME_PERIODS
+convbbt_params["input_dim"] = N_FEATURES
 convbbt_params["num_classes"] = len(LABELS)
-convbbt_params["channels"] = N_FEATURES
+convbbt_params["channels"] = TIME_PERIODS
 
 loss_function = nn.CrossEntropyLoss()
 model = PreConvTransformer(**convbbt_params).to(device)
