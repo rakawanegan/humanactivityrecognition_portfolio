@@ -112,8 +112,9 @@ def n_plot_activity(activity, data, savedir="processed/assets/miss_activity_plot
 
     if len(data.shape) == 1:
         ch = 1
-        fig, axs = plt.subplots(nrows=ch,
-            figsize=(15, 10),
+        fig, axs = plt.subplots(
+            nrows=ch,
+            figsize=(15, 5),
             sharex=True)
         time_steps = np.linspace(0, 4, num=data.shape[0])
         _plot_axis(axs, time_steps, data, '1-Axis')
@@ -125,8 +126,8 @@ def n_plot_activity(activity, data, savedir="processed/assets/miss_activity_plot
         # plt.show()
     else:
         ch = data.shape[1]
-        fig, axs = plt.subplots(nrows=ch,
-            figsize=(15, 10),
+        fig, axs = plt.subplots(
+            nrows=ch,
             sharex=True)
         time_steps = np.linspace(0, 4, num=data.shape[0])
         for i in range(ch):
