@@ -99,3 +99,41 @@ def plot_activity(activity, data, savedir="processed/assets/miss_activity_plots"
     # os.makedirs(savedir, exist_ok=True)
     # plt.savefig(f"{savedir}/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
     # plt.show()
+
+def n_plot_activity(activity, data, savedir="processed/assets/miss_activity_plots"):
+
+    def _plot_axis(ax, x, y, title):
+        ax.plot(x, y, 'r')
+        ax.set_title(title)
+        ax.xaxis.set_visible(False)
+        ax.set_ylim([min(y) - np.std(y), max(y) + np.std(y)])
+        ax.set_xlim([min(x), max(x)])
+        ax.grid(True)
+
+    if len(data.shape) == 1:
+        ch = 1
+        fig, axs = plt.subplots(nrows=ch,
+            figsize=(15, 10),
+            sharex=True)
+        time_steps = np.linspace(0, 4, num=data.shape[0])
+        _plot_axis(axs, time_steps, data, '1-Axis')
+        plt.subplots_adjust(hspace=0.2)
+        fig.suptitle(activity)
+        plt.subplots_adjust(top=0.90)
+        # os.makedirs(savedir, exist_ok=True)
+        # plt.savefig(f"{savedir}/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
+        # plt.show()
+    else:
+        ch = data.shape[1]
+        fig, axs = plt.subplots(nrows=ch,
+            figsize=(15, 10),
+            sharex=True)
+        time_steps = np.linspace(0, 4, num=data.shape[0])
+        for i in range(ch):
+            _plot_axis(axs[i], time_steps, data[:,i], f'{i+1}-Axis')
+        plt.subplots_adjust(hspace=0.2)
+        fig.suptitle(activity)
+        plt.subplots_adjust(top=0.90)
+        # os.makedirs(savedir, exist_ok=True)
+        # plt.savefig(f"{savedir}/{activity}-{''.join([random.choice(string.ascii_letters + string.digits) for i in range(7)])}.png")
+        # plt.show()
