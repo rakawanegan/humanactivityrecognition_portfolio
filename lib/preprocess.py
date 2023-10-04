@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
+import copy
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
@@ -53,9 +54,87 @@ def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_ro
     x, y = create_segments_and_labels(df, TIME_PERIODS, STEP_DISTANCE, LABEL)
     if n_rows:
         x, y = x[:n_rows], y[:n_rows]
-
-    # print(f"{LABELS} -> {le.transform(LABELS)}")
     ohe = OneHotEncoder()
     Y_one_hot = ohe.fit_transform(y.reshape(-1, 1)).toarray()
 
     return train_test_split(x, Y_one_hot, test_size=0.3, random_state=SEED) # x_train, x_test, y_train, y_test
+
+def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED):
+    def _absoulte(data):
+        inputs = copy.deepcopy(data)
+        outputs = copy.deepcopy(data)
+        for i in range(len(inputs)):
+            outputs[i] = np.sqrt(np.sum(np.square(inputs[i])))
+        return outputs[:,0]
+
+    def _gaussian_filter(data, sigma=1, k=5):
+        def _gaussian(x, sigma):
+            return np.exp(-np.power(x, 2.) / (2 * np.power(sigma, 2.)))
+        def _pad(x, k):
+            return np.pad(x, (k, k), 'constant', constant_values=(0, 0))
+        def _convolve(x, w):
+            return np.convolve(x, w, mode='valid')
+        inputs = copy.deepcopy(data)
+        outputs = copy.deepcopy(data)
+        w = _gaussian(np.arange(-k, k+1), sigma)
+        for i in range(len(inputs)):
+            outputs[i] = _convolve(_pad(inputs[i], k), w)
+        return outputs
+
+    def _median_filter(data, k=5):
+        def _pad(x, k):
+            return np.pad(x, (k, k), 'constant', constant_values=(0, 0))
+        def _convolve(x, w):
+            return np.convolve(x, w, mode='valid')
+        inputs = copy.deepcopy(data)
+        outputs = copy.deepcopy(data)
+        w = np.ones(k) / k
+        for i in range(len(inputs)):
+            outputs[i] = _convolve(_pad(inputs[i], k), w)
+        return outputs
+
+    def _difference(data):
+        inputs = copy.deepcopy(data)
+        outputs = copy.deepcopy(data)
+        outputs[0] = 0
+        for i in range(1, len(inputs)):
+            outputs[i] = (inputs[i] - inputs[i-1])
+        return outputs
+
+    def _differential(data):
+        inputs = copy.deepcopy(data)
+        outputs = copy.deepcopy(data)
+        outputs[0] = 0
+        for i in range(1, len(inputs)):
+            outputs[i] = (inputs[i] - inputs[i-1]) * STEP_DISTANCE
+        return outputs
+
+    def _integral(data):
+        inputs = copy.deepcopy(data)
+        outputs = copy.deepcopy(data)
+        outputs[0] = 0
+        for i in range(1, len(inputs)):
+            outputs[i] = (outputs[i-1] + inputs[i]) / STEP_DISTANCE
+        return outputs
+    
+    def _preprocess(data):
+        axislist = list()
+        axislist.append(_absoulte(data))
+        axislist.append(_difference(data))
+        axislist.append(_difference(_difference(data)))
+        axislist.append(_gaussian_filter(data))
+        axislist.append(_difference(_gaussian_filter(data)))
+        axislist.append(_difference(_difference(_gaussian_filter(data))))
+        axislist.append(_median_filter(data))
+        axislist.append(_difference(_median_filter(data)))
+        axislist.append(_difference(_difference(_median_filter(data))))
+        # axislist.append(_differential(data))
+        # axislist.append(_differential(_differential(data)))
+        axislist.append(_integral(data))
+        axislist.append(_integral(_integral(data)))
+        return np.array(axislist).T
+    
+    x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
+    x_train = _preprocess(x_train)
+    x_test = _preprocess(x_test)
+    return x_train, x_test, y_train, y_test
