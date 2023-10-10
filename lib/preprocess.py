@@ -83,7 +83,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
 
     def _median_filter(data, k=5):
         def _pad(x, k):
-            return np.pad(x, (k), 'constant', constant_values=(0, 0))
+            return np.pad(x, (k), 'constant', constant_values=(0))
         def _convolve(x, w):
             return np.array([np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid')])
         inputs = copy.deepcopy(data)
