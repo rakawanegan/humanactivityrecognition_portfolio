@@ -55,7 +55,7 @@ def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_ro
         x, y = x[:n_rows], y[:n_rows]
     ohe = OneHotEncoder()
     Y_one_hot = ohe.fit_transform(y.reshape(-1, 1)).toarray()
-
+    # print(x.shape)
     return train_test_split(x, Y_one_hot, test_size=0.3, random_state=SEED) # x_train, x_test, y_train, y_test
 
 def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED):
@@ -134,8 +134,8 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         axislist.append(_integral(_integral(data)))
         axislist = np.array(axislist)
         axislist = axislist.reshape(axislist.shape[1], axislist.shape[2], axislist.shape[0] * axislist.shape[3])
-        print(axislist.T.shape)
-        return np.array(axislist).T
+        # print(axislist.shape)
+        return axislist
 
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
     x_train = _preprocess(x_train)
@@ -156,5 +156,5 @@ if __name__ == '__main__':
     # set random seed
     SEED = 314
 
-    # load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
+    load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
     load_preprocessed_data( LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
