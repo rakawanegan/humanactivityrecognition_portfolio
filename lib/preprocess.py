@@ -134,8 +134,8 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         # axislist.append(_difference(_median_filter(data)))
         # axislist.append(_difference(_difference(_median_filter(data))))
 
-        # axislist.append(_differential(data))
-        # axislist.append(_differential(_differential(data)))
+        # axislist.append(_differential(data)) # diverge
+        # axislist.append(_differential(_differential(data))) # diverge
         axislist.append(_integral(data))
         axislist.append(_integral(_integral(data)))
         axislist = np.array(axislist)

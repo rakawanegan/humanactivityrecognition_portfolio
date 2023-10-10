@@ -41,6 +41,7 @@ def main():
     print(f"{date}_{args.path}_{idx} done")
     # send_email(f"{date}_{args.path}_{idx} done", f"{date}_{args.path}_{idx} is done")
     if args.git == "push":
+        gitpull = run_command(f"git pull")
         gita = run_command(f"git add .")
         print("git add")
         message = run_command(f"tail -5 {dirname}/raw/experiment.log")
@@ -48,7 +49,7 @@ def main():
         gitc = run_command(f'git commit -m "add result"')
         print("git commit")
         print(message)
-        gitp = run_command(f"git push")
+        gitpush = run_command(f"git push")
         print("git push")
         print("git done")
     print("done")
