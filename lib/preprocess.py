@@ -74,7 +74,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
             return np.pad(x, (k, k), 'constant', constant_values=(0, 0))
         def _convolve(x, w):
             return np.convolve(x, w, mode='valid')
-        inputs = copy.deepcopy(data)
+        inputs = copy.deepcopy(data).reshape(-1)
         outputs = copy.deepcopy(data)
         w = _gaussian(np.arange(-k, k+1), sigma)
         for i in range(len(inputs)):
@@ -116,7 +116,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         for i in range(1, len(inputs)):
             outputs[i] = (outputs[i-1] + inputs[i]) / STEP_DISTANCE
         return outputs
-    
+
     def _preprocess(data):
         axislist = list()
         axislist.append(_absoulte(data))
@@ -133,7 +133,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         axislist.append(_integral(data))
         axislist.append(_integral(_integral(data)))
         return np.array(axislist).T
-    
+
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
     x_train = _preprocess(x_train)
     x_test = _preprocess(x_test)
