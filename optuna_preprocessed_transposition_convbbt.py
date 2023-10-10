@@ -39,7 +39,7 @@ SEED = 314
 x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
-N_FEATURES = x_train.shape[2] + 1
+N_FEATURES = x_train.shape[2]
 diridx = 0
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
     diridx += 1

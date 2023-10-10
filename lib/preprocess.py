@@ -134,6 +134,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         axislist.append(_integral(_integral(data)))
         axislist = np.array(axislist)
         axislist = axislist.reshape(axislist.shape[1], axislist.shape[2], axislist.shape[0] * axislist.shape[3])
+        print(axislist.T.shape)
         return np.array(axislist).T
 
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)

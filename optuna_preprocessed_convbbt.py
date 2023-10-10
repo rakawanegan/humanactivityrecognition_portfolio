@@ -38,7 +38,7 @@ SEED = 314
 x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
-N_FEATURES = x_train.shape[2] + 1
+N_FEATURES = x_train.shape[2]
 diridx = 0
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
     diridx += 1
@@ -74,10 +74,10 @@ adam_searchspace = {
 # }
 
 convbbt_searchspace = {
-    "hidden_ch": [3, 5, 7, 8, 10, 15],
+    "hidden_ch": [3, 5, 7, 8, 10, 15, 18, 20, 23, 25, 30],
+    "hidden_dim": [64, 128, 256, 512, 1024],
     "depth": [3, 5, 6, 8],
     "heads": [3, 5, 6, 8, 10],
-    "hidden_dim": [64, 128, 256, 512, 1024],
     "mlp_dim": [256, 512, 1024, 2048],
     "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
     "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
