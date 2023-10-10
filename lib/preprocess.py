@@ -116,6 +116,12 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
             outputs[i] = (outputs[i-1] + inputs[i]) / STEP_DISTANCE
         return outputs
 
+    def _normalize(data):
+        ch_num = data.shape[2]
+        for i in range(ch_num):
+            data[:,:,i] = (data[:,:,i] - np.mean(data[:,:,i])) / np.std(data[:,:,i])
+        return data
+
     def _preprocess(data):
         axislist = list()
         axislist.append(data)
@@ -135,6 +141,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         axislist = np.array(axislist)
         axislist = axislist.reshape(axislist.shape[1], axislist.shape[2], axislist.shape[0] * axislist.shape[3])
         # print(axislist.shape)
+        axislist = _normalize(axislist)
         return axislist
 
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
