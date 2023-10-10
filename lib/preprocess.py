@@ -73,7 +73,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         def _pad(x, k):
             return np.pad(x, (k, k), 'constant', constant_values=(0, 0))
         def _convolve(x, w):
-            return np.array(np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid'))
+            return np.array([np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid')])
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
         w = _gaussian(np.arange(-k, k+1), sigma)
@@ -85,7 +85,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         def _pad(x, k):
             return np.pad(x, (k, k), 'constant', constant_values=(0, 0))
         def _convolve(x, w):
-            return np.array(np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid'))
+            return np.array([np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid')])
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
         w = np.ones(k) / k
