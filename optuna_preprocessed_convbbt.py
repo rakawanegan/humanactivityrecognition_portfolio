@@ -184,7 +184,7 @@ study = optuna.create_study(
                         direction="maximize",
                         sampler=optuna.samplers.TPESampler(seed=SEED),
                         study_name=f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}",
-                        storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
+                        # storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
                         load_if_exists=True,
                         )
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
