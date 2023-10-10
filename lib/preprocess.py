@@ -5,7 +5,6 @@ import copy
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-
 def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_rows:int=False):
     def read_data(file_path):
         column_names = [
@@ -65,7 +64,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs = copy.deepcopy(data)
         for i in range(len(inputs)):
             outputs[i] = np.sqrt(np.sum(np.square(inputs[i])))
-        return outputs[:,0]
+        return outputs[0]
 
     def _gaussian_filter(data, sigma=1, k=5):
         def _gaussian(x, sigma):
@@ -79,7 +78,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         w = _gaussian(np.arange(-k, k+1), sigma)
         for i in range(len(inputs)):
             outputs[i] = _convolve(_pad(inputs[i], k), w)
-        return outputs[:,0], outputs[:,1], outputs[:,2]
+        return outputs
 
     def _median_filter(data, k=5):
         def _pad(x, k):
@@ -91,7 +90,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         w = np.ones(k) / k
         for i in range(len(inputs)):
             outputs[i] = _convolve(_pad(inputs[i], k), w)
-        return outputs[:,0], outputs[:,1], outputs[:,2]
+        return outputs
 
     def _difference(data):
         inputs = copy.deepcopy(data)
@@ -99,7 +98,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs[0] = 0
         for i in range(1, len(inputs)):
             outputs[i] = (inputs[i] - inputs[i-1])
-        return outputs[:,0], outputs[:,1], outputs[:,2]
+        return outputs
 
     def _differential(data):
         inputs = copy.deepcopy(data)
@@ -107,7 +106,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs[0] = 0
         for i in range(1, len(inputs)):
             outputs[i] = (inputs[i] - inputs[i-1]) * STEP_DISTANCE
-        return outputs[:,0], outputs[:,1], outputs[:,2]
+        return outputs
 
     def _integral(data):
         inputs = copy.deepcopy(data)
@@ -115,29 +114,14 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs[0] = 0
         for i in range(1, len(inputs)):
             outputs[i] = (outputs[i-1] + inputs[i]) / STEP_DISTANCE
-        return outputs[:,0], outputs[:,1], outputs[:,2]
+        return outputs
 
     def _preprocess(data):
         axislist = list()
-
-        vanilla_x, vanilla_y, vanilla_z = data[:,0], data[:,1], data[:,2]
-        axislist.append(vanilla_x)
-        axislist.append(vanilla_y)
-        axislist.append(vanilla_z)
-
-        absolute_xyz = _absoulte(data)
-        axislist.append(absolute_xyz)
-
-        _difference_x, _difference_y, _difference_z = _difference(data)
-        axislist.append(_difference_x)
-        axislist.append(_difference_y)
-        axislist.append(_difference_z)
-
-        difference_difference_x, difference_difference_y, difference_difference_z = _difference(_difference(data))
-        axislist.append(difference_difference_x)
-        axislist.append(difference_difference_y)
-        axislist.append(difference_difference_z)
-
+        axislist.append(data)
+        axislist.append(_difference(data))
+        axislist.append(_difference(_difference(data)))
+        # axislist.append(_absoulte(data))
         # axislist.append(_gaussian_filter(data))
         # axislist.append(_difference(_gaussian_filter(data)))
         # axislist.append(_difference(_difference(_gaussian_filter(data))))
@@ -146,19 +130,30 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         # axislist.append(_difference(_difference(_median_filter(data))))
         # axislist.append(_differential(data))
         # axislist.append(_differential(_differential(data)))
-
-        integral_x, integral_y, integral_z = _integral(data)
-        axislist.append(integral_x)
-        axislist.append(integral_y)
-        axislist.append(integral_z)
-
-        integral_integral_x, integral_integral_y, integral_integral_z = _integral(_integral(data))
-        axislist.append(integral_integral_x)
-        axislist.append(integral_integral_y)
-        axislist.append(integral_integral_z)
+        axislist.append(_integral(data))
+        axislist.append(_integral(_integral(data)))
+        axislist = np.array(axislist)
+        axislist = axislist.reshape(axislist.shape[1], axislist.shape[2], axislist.shape[0] * axislist.shape[3])
         return np.array(axislist).T
 
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
     x_train = _preprocess(x_train)
     x_test = _preprocess(x_test)
     return x_train, x_test, y_train, y_test
+
+if __name__ == '__main__':
+    LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
+    # The number of steps within one time segment
+    TIME_PERIODS = 80
+    # The steps to take from one segment to the next; if this value is equal to
+    # TIME_PERIODS, then there is no overlap between the segments
+    STEP_DISTANCE = 40
+    # x, y, z acceleration as features
+    N_FEATURES = 3
+    # Define column name of the label vector
+    LABEL = "ActivityEncoded"
+    # set random seed
+    SEED = 314
+
+    # load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
+    load_preprocessed_data( LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
