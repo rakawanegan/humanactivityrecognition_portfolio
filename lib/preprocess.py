@@ -64,7 +64,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs = copy.deepcopy(data)
         for i in range(len(inputs)):
             outputs[i] = np.sqrt(np.sum(np.square(inputs[i])))
-        return outputs[0]
+        return outputs[:,:,0]
 
     def _gaussian_filter(data, sigma=1, k=5):
         def _gaussian(x, sigma):
@@ -127,20 +127,20 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         axislist.append(data)
         axislist.append(_difference(data))
         axislist.append(_difference(_difference(data)))
-        # axislist.append(_absoulte(data))
         # axislist.append(_gaussian_filter(data))
         # axislist.append(_difference(_gaussian_filter(data)))
         # axislist.append(_difference(_difference(_gaussian_filter(data))))
         # axislist.append(_median_filter(data))
         # axislist.append(_difference(_median_filter(data)))
         # axislist.append(_difference(_difference(_median_filter(data))))
+
         # axislist.append(_differential(data))
         # axislist.append(_differential(_differential(data)))
         axislist.append(_integral(data))
         axislist.append(_integral(_integral(data)))
         axislist = np.array(axislist)
         axislist = axislist.reshape(axislist.shape[1], axislist.shape[2], axislist.shape[0] * axislist.shape[3])
-        # print(axislist.shape)
+        axislist = np.append(axislist, _absoulte(data).reshape(axislist.shape[0], axislist.shape[1], 1), axis=2)
         axislist = _normalize(axislist)
         return axislist
 
@@ -163,5 +163,5 @@ if __name__ == '__main__':
     # set random seed
     SEED = 314
 
-    load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
+    # load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
     load_preprocessed_data( LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)

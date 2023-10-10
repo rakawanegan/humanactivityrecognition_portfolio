@@ -41,9 +41,8 @@ x_train, x_test, y_train, y_test = load_data(
 )
 diridx = 0
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
     diridx += 1
-diridx -= 1
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 
 # Hyperparameters
 MAX_EPOCH = 200

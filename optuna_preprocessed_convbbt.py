@@ -41,15 +41,14 @@ x_train, x_test, y_train, y_test = load_data(
 N_FEATURES = x_train.shape[2]
 diridx = 0
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
     diridx += 1
-diridx -= 1
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 
 # Hyperparameters
 MAX_EPOCH = 200
 BATCH_SIZE = 128
 REF_SIZE = 5
-TIMEOUT_HOURS = 2
+TIMEOUT_HOURS = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
