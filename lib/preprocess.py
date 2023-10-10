@@ -79,7 +79,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         w = _gaussian(np.arange(-k, k+1), sigma)
         for i in range(len(inputs)):
             outputs[i] = _convolve(_pad(inputs[i], k), w)
-        return outputs
+        return outputs[:,0], outputs[:,1], outputs[:,2]
 
     def _median_filter(data, k=5):
         def _pad(x, k):
@@ -91,7 +91,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         w = np.ones(k) / k
         for i in range(len(inputs)):
             outputs[i] = _convolve(_pad(inputs[i], k), w)
-        return outputs
+        return outputs[:,0], outputs[:,1], outputs[:,2]
 
     def _difference(data):
         inputs = copy.deepcopy(data)
@@ -99,7 +99,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs[0] = 0
         for i in range(1, len(inputs)):
             outputs[i] = (inputs[i] - inputs[i-1])
-        return outputs
+        return outputs[:,0], outputs[:,1], outputs[:,2]
 
     def _differential(data):
         inputs = copy.deepcopy(data)
@@ -107,7 +107,7 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs[0] = 0
         for i in range(1, len(inputs)):
             outputs[i] = (inputs[i] - inputs[i-1]) * STEP_DISTANCE
-        return outputs
+        return outputs[:,0], outputs[:,1], outputs[:,2]
 
     def _integral(data):
         inputs = copy.deepcopy(data)
@@ -115,14 +115,29 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         outputs[0] = 0
         for i in range(1, len(inputs)):
             outputs[i] = (outputs[i-1] + inputs[i]) / STEP_DISTANCE
-        return outputs
+        return outputs[:,0], outputs[:,1], outputs[:,2]
 
     def _preprocess(data):
         axislist = list()
-        axislist.append(data)
-        axislist.append(_absoulte(data))
-        axislist.append(_difference(data))
-        axislist.append(_difference(_difference(data)))
+
+        vanilla_x, vanilla_y, vanilla_z = data[:,0], data[:,1], data[:,2]
+        axislist.append(vanilla_x)
+        axislist.append(vanilla_y)
+        axislist.append(vanilla_z)
+
+        absolute_xyz = _absoulte(data)
+        axislist.append(absolute_xyz)
+
+        _difference_x, _difference_y, _difference_z = _difference(data)
+        axislist.append(_difference_x)
+        axislist.append(_difference_y)
+        axislist.append(_difference_z)
+
+        difference_difference_x, difference_difference_y, difference_difference_z = _difference(_difference(data))
+        axislist.append(difference_difference_x)
+        axislist.append(difference_difference_y)
+        axislist.append(difference_difference_z)
+
         # axislist.append(_gaussian_filter(data))
         # axislist.append(_difference(_gaussian_filter(data)))
         # axislist.append(_difference(_difference(_gaussian_filter(data))))
@@ -131,8 +146,16 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
         # axislist.append(_difference(_difference(_median_filter(data))))
         # axislist.append(_differential(data))
         # axislist.append(_differential(_differential(data)))
-        axislist.append(_integral(data))
-        axislist.append(_integral(_integral(data)))
+
+        integral_x, integral_y, integral_z = _integral(data)
+        axislist.append(integral_x)
+        axislist.append(integral_y)
+        axislist.append(integral_z)
+
+        integral_integral_x, integral_integral_y, integral_integral_z = _integral(_integral(data))
+        axislist.append(integral_integral_x)
+        axislist.append(integral_integral_y)
+        axislist.append(integral_integral_z)
         return np.array(axislist).T
 
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
