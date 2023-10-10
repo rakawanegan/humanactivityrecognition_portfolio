@@ -18,7 +18,7 @@ from lib.preprocess import load_preprocessed_data as load_data
 from lib.local_utils import is_worse, SeqDataset
 
 
-MODEL_NAME = "optuna_transposition_convbbt"
+MODEL_NAME = "optuna_processed_transposition_convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
