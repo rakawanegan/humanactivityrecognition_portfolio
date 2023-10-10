@@ -50,7 +50,7 @@ dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 MAX_EPOCH = 200
 BATCH_SIZE = 128
 REF_SIZE = 5
-TIMEOUT_HOURS = 24
+TIMEOUT_HOURS = 2
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
