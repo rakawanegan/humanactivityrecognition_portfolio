@@ -41,6 +41,7 @@ x_train, x_test, y_train, y_test = load_data(
 )
 N_FEATURES = x_train.shape[2]
 diridx = 0
+dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
 while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
     dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
     diridx += 1
@@ -49,7 +50,7 @@ while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx
 MAX_EPOCH = 200
 BATCH_SIZE = 128
 REF_SIZE = 5
-TIMEOUT_HOURS = 10
+TIMEOUT_HOURS = 12
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(SEED)
 torch.cuda.manual_seed(SEED)
@@ -186,7 +187,7 @@ study = optuna.create_study(
                         direction="maximize",
                         sampler=optuna.samplers.TPESampler(seed=SEED),
                         study_name=f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}",
-                        # storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
+                        storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
                         load_if_exists=True,
                         )
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)

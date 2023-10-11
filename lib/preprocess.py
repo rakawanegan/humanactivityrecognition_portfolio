@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_rows:int=False):
+    print("Loading data...")
     def read_data(file_path):
         column_names = [
             "user-id",
@@ -56,9 +57,11 @@ def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_ro
     ohe = OneHotEncoder()
     Y_one_hot = ohe.fit_transform(y.reshape(-1, 1)).toarray()
     # print(x.shape)
+    print("Data loaded.")
     return train_test_split(x, Y_one_hot, test_size=0.3, random_state=SEED) # x_train, x_test, y_train, y_test
 
-def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED):
+def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, normalize=True):
+    SAMPLING_RATE = 20
     def _absoulte(data):
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
@@ -66,87 +69,82 @@ def load_preprocessed_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURE
             outputs[i] = np.sqrt(np.sum(np.square(inputs[i])))
         return outputs[:,:,0]
 
-    def _gaussian_filter(data, sigma=1, k=5):
-        def _gaussian(x, sigma):
-            return np.exp(-np.power(x, 2.) / (2 * np.power(sigma, 2.)))
-        def _pad(x, k):
-            return np.pad(x, (k), 'constant', constant_values=(0))
-        def _convolve(x, w):
-            return np.array([np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid')])
+    def _gaussian_filter(data, sigma=1.5, k=5):
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
-        w = _gaussian(np.arange(-k, k+1), sigma)
+        w = np.exp(-np.square(np.arange(-k,k+1))/(2*sigma*sigma))
         for i in range(len(inputs)):
-            outputs[i] = _convolve(_pad(inputs[i], k), w)
+            for j in range(3):
+                outputs[i,:,j] = np.convolve(np.pad(inputs[i,:,j], (k,k), 'edge'), w, mode='valid')
         return outputs
 
     def _median_filter(data, k=5):
-        def _pad(x, k):
-            return np.pad(x, (k), 'constant', constant_values=(0))
-        def _convolve(x, w):
-            return np.array([np.convolve(x[0], w, mode='valid'), np.convolve(x[1], w, mode='valid'), np.convolve(x[2], w, mode='valid')])
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
-        w = np.ones(k) / k
-        for i in range(len(inputs)):
-            outputs[i] = _convolve(_pad(inputs[i], k), w)
+        n, m, c = inputs.shape
+        for i in range(n):
+            for j in range(c):
+                for kernel in range(k, m-k):
+                    outputs[i,kernel,j] = np.median(inputs[i,kernel-k:kernel+k+1,j])
         return outputs
 
-    def _difference(data):
+    def _difference(data, differential=1): # differential = 1 or SAMPLING_RATE
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
-        outputs[0] = 0
-        for i in range(1, len(inputs)):
-            outputs[i] = (inputs[i] - inputs[i-1])
-        return outputs
-
-    def _differential(data):
-        inputs = copy.deepcopy(data)
-        outputs = copy.deepcopy(data)
-        outputs[0] = 0
-        for i in range(1, len(inputs)):
-            outputs[i] = (inputs[i] - inputs[i-1]) * STEP_DISTANCE
+        outputs[:,0,:] = 0
+        for ip in inputs:
+            for i in range(1, len(ip)):
+                for j in range(len(ip[i])):
+                    outputs[i,j] = ip[i,j] - ip[i-1,j]
+                    outputs[i,j] *= differential
         return outputs
 
     def _integral(data):
         inputs = copy.deepcopy(data)
         outputs = copy.deepcopy(data)
         outputs[0] = 0
-        for i in range(1, len(inputs)):
-            outputs[i] = (outputs[i-1] + inputs[i]) / STEP_DISTANCE
+        for ip in inputs:
+            for i in range(1, len(ip)):
+                for j in range(len(ip[i])):
+                    outputs[i,j] = outputs[i-1,j] + ip[i,j]
+                    outputs[i,j] /= SAMPLING_RATE
         return outputs
 
-    def _normalize(data):
-        ch_num = data.shape[2]
+    def normalize(train, test):
+        ch_num = train.shape[2]
         for i in range(ch_num):
-            data[:,:,i] = (data[:,:,i] - np.mean(data[:,:,i])) / np.std(data[:,:,i])
-        return data
+            mean = np.mean(train[:,:,i])
+            std = np.std(train[:,:,i])
+            train[:,:,i] = (train[:,:,i] - mean) / std
+            test[:,:,i] = (test[:,:,i] - mean) / std
+        return train, test
 
-    def _preprocess(data):
+    def _preprocess(data, normalize=True):
         axislist = list()
         axislist.append(data)
         axislist.append(_difference(data))
         axislist.append(_difference(_difference(data)))
-        # axislist.append(_gaussian_filter(data))
-        # axislist.append(_difference(_gaussian_filter(data)))
-        # axislist.append(_difference(_difference(_gaussian_filter(data))))
-        # axislist.append(_median_filter(data))
-        # axislist.append(_difference(_median_filter(data)))
-        # axislist.append(_difference(_difference(_median_filter(data))))
-
-        # axislist.append(_differential(data)) # diverge
-        # axislist.append(_differential(_differential(data))) # diverge
+        axislist.append(_gaussian_filter(data))
+        axislist.append(_difference(_gaussian_filter(data)))
+        axislist.append(_difference(_difference(_gaussian_filter(data))))
+        axislist.append(_median_filter(data))
+        axislist.append(_difference(_median_filter(data)))
+        axislist.append(_difference(_difference(_median_filter(data))))
         axislist.append(_integral(data))
         axislist.append(_integral(_integral(data)))
         axislist = np.array(axislist)
         axislist = axislist.reshape(axislist.shape[1], axislist.shape[2], axislist.shape[0] * axislist.shape[3])
         axislist = np.append(axislist, _absoulte(data).reshape(axislist.shape[0], axislist.shape[1], 1), axis=2)
-        axislist = _normalize(axislist)
         return axislist
 
     x_train, x_test, y_train, y_test = load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED)
+    print("Preprocessing data...")
     x_train = _preprocess(x_train)
     x_test = _preprocess(x_test)
+    if normalize:
+        print("Normalizing data...")
+        x_train, x_test = normalize(x_train, x_test)
+    print("Data loaded and preprocessed.")
     return x_train, x_test, y_train, y_test
 
 if __name__ == '__main__':

@@ -39,10 +39,10 @@ x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 diridx = 0
-while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
-    diridx += 1
-diridx -= 1
 dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+    diridx += 1
 
 # Hyperparameters
 MAX_EPOCH = 200
