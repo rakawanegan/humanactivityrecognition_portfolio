@@ -106,12 +106,11 @@ def normalize(train, test):
     return train, test
 
 
-def run(preprocessor):
+def run(preprocessor, name):
+    print("------------------")
     x_train, x_test, y_train, y_test = load_data(
         LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
     )
-    print("------------------")
-    PREPROCESSFUNC = preprocessor.name
     # preprocess data
     x_train = preprocessor.func(x_train)
     x_test = preprocessor.func(x_test)
@@ -228,7 +227,7 @@ def run(preprocessor):
     plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
     plt.ylabel("True label")
     plt.xlabel("Predicted label")
-    plt.savefig(f"{dirname}/{PREPROCESSFUNC}-cross-tab.png")
+    plt.savefig(f"{dirname}/{name}-cross-tab.png")
     report = classification_report(y_test, y_pred, target_names=LABELS)
     print(report)
     print("------------------")
@@ -236,135 +235,57 @@ def run(preprocessor):
 
 # we can change this code to preprocess data
 
-class vannilapreprocessor:
-    def __init__(self, ):
-        self.name = "vanilla"
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
+def vannilapreprocessor(data):
         data = vanilla(data)
         return data
 
-class gaussianpreprocessor:
-    def __init__(self, sigma=1.5, k=5):
-        self.name = f"gaussian_{sigma}_{k}"
-        self.sigma = sigma
-        self.k = k
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = gaussian_filter(data, self.sigma, self.k)
-        return data
+def gaussianpreprocessor(data):
+    data = gaussian_filter(data)
+    return data
 
-class medianpreprocessor:
-    def __init__(self, k=5):
-        self.name = f"median_{k}"
-        self.k = k
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = median_filter(data, self.k)
-        return data
+def medianpreprocessor(data):
+    data = median_filter(data)
+    return data
 
-class differencepreprocessor:
-    def __init__(self, differential=1):
-        self.name = f"difference_{differential}"
-        self.differential = differential
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = difference(data, self.differential)
-        return data
+def differencepreprocessor(data):
+    data = difference(data)
+    return data
 
-class differencedifferencepreprocessor:
-    def __init__(self, ):
-        self.name = f"difference_difference"
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = difference(data, 1)
-        data = difference(data, 1)
-        return data
+def differencedifferencepreprocessor(data):
+    data = difference(data, 1)
+    data = difference(data, 1)
+    return data
 
-class integralpreprocessor:
-    def __init__(self, ):
-        self.name = f"integral"
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = integral(data)
-        return data
+def integralpreprocessor(data):
+    data = integral(data)
+    return data
 
-class integralintegralpreprocessor:
-    def __init__(self, ):
-        self.name = f"integral_integral"
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = integral(data)
-        data = integral(data)
-        return data
+def integralintegralpreprocessor(data):
+    data = integral(data)
+    data = integral(data)
+    return data
 
-class gaussiandifferencepreprocessor:
-    def __init__(self, sigma=1.5, k=5, differential=1):
-        self.name = f"gaussian_{sigma}_{k}_difference_{differential}"
-        self.sigma = sigma
-        self.k = k
-        self.differential = differential
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = gaussian_filter(data, self.sigma, self.k)
-        data = difference(data, self.differential)
-        return data
+def gaussiandifferencepreprocessor(data):
+    data = gaussian_filter(data)
+    data = difference(data)
+    return data
 
-class gaussiandifferencedifferencepreprocessor:
-    def __init__(self, sigma=1.5, k=5):
-        self.name = f"gaussian_{sigma}_{k}_difference_difference"
-        self.sigma = sigma
-        self.k = k
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = gaussian_filter(data, self.sigma, self.k)
-        data = difference(data, 1)
-        data = difference(data, 1)
-        return data
+def gaussiandifferencedifferencepreprocessor(data):
+    data = gaussian_filter(data)
+    data = difference(data)
+    data = difference(data)
+    return data
 
-class mediandifferencepreprocessor:
-    def __init__(self, k=5, differential=1):
-        self.name = f"median_{k}_difference_{differential}"
-        self.k = k
-        self.differential = differential
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = median_filter(data, self.k)
-        data = difference(data, self.differential)
-        return data
+def mediandifferencepreprocessor(data):
+    data = median_filter(data)
+    data = difference(data)
+    return data
 
-class mediandifferencedifferencepreprocessor:
-    def __init__(self, k=5):
-        self.name = f"median_{k}_difference_difference"
-        self.k = k
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-    def func(self,data):
-        print(f"{self.name} preprocess")
-        data = median_filter(data, self.k)
-        data = difference(data, 1)
-        data = difference(data, 1)
-        return data
+def mediandifferencedifferencepreprocessor(data):
+    data = median_filter(data)
+    data = difference(data)
+    data = difference(data)
+    return data
 
 vanilla = vannilapreprocessor()
 gaussian = gaussianpreprocessor()
@@ -378,19 +299,19 @@ gaussiandifferencedifference = gaussiandifferencedifferencepreprocessor()
 mediandifference = mediandifferencepreprocessor()
 mediandifferencedifference = mediandifferencedifferencepreprocessor()
 
-preprocessors = [
-    vanilla,
-    gaussian,
-    median,
-    difference,
-    differencedifference,
-    integral,
-    integralintegral,
-    gaussiandifference,
-    gaussiandifferencedifference,
-    mediandifference,
-    mediandifferencedifference,
-]
+preprocessors = {
+    "vanilla": vanilla,
+    "gaussian": gaussian,
+    "median": median,
+    "difference": difference,
+    "differencedifference": differencedifference,
+    "integral": integral,
+    "integralintegral": integralintegral,
+    "gaussiandifference": gaussiandifference,
+    "gaussiandifferencedifference": gaussiandifferencedifference,
+    "mediandifference": mediandifference,
+    "mediandifferencedifference": mediandifferencedifference,
+}
 
-for preprocessor in preprocessors:
-    run(preprocessor)
+for name, preprocessor in preprocessors.items():
+    run(preprocessor, name)
