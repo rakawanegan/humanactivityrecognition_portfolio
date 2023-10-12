@@ -112,8 +112,8 @@ def run(preprocessor, name):
         LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
     )
     # preprocess data
-    x_train = preprocessor.func(x_train)
-    x_test = preprocessor.func(x_test)
+    x_train = preprocessor(x_train)
+    x_test = preprocessor(x_test)
 
     # axis-wise input
     adm_params = {
