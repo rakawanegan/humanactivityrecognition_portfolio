@@ -41,6 +41,9 @@ python3 run.py --path [py file name]
 > cross_tab.png: using labnotebook picture  
 > labnotebook.md: experiment description  
 
+# architecture
+![convbbt_architechture](assets/convbbt_architechture.png)
+
 # Tree
 
 <pre>
