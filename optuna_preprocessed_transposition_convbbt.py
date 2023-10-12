@@ -122,9 +122,9 @@ def obj(trial):
     # LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
     # sampling_weight = np.array([0.091, 0.312, 0.055, 0.044, 0.112, 0.386])
     # sampling_weight = np.array([1.0] * len(LABELS))
-    weight_from_result = [1.5, 1.0, 1.0, 1.0, 1.5, 1.5]
-    sampling_weight = np.array(weight_from_result)/np.sum(weight_from_result)
-    sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
+    # weight_from_result = [1.5, 1.0, 1.0, 1.0, 1.5, 1.5]
+    # sampling_weight = np.array(weight_from_result)/np.sum(weight_from_result)
+    # sampler = WeightedRandomSampler(weights=sampling_weight, num_samples=len(x_train), replacement=True)
     train_loader = DataLoader(
         train,
         # sampler=sampler,
@@ -187,13 +187,12 @@ study = optuna.create_study(
                         direction="maximize",
                         sampler=optuna.samplers.TPESampler(seed=SEED),
                         study_name=f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}",
-                        # storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
+                        # storage=f"sqlite:///result/{dirname}/raw/optuna.db",
                         load_if_exists=True,
                         )
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
 # study.optimize(obj, n_trials=1000)
 print(study.best_trial)
-joblib.dump(study, f"{dirname}/raw/study.pkl")
 
 all_params = dict(study.best_params)
 adam_params = {k: all_params[k] for k in adam_searchspace.keys()}
@@ -317,3 +316,4 @@ param["search_space"] = search_space
 param["TIMEOUT_HOURS"] = TIMEOUT_HOURS
 
 joblib.dump(param, f"{dirname}/raw/param.pkl")
+joblib.dump(study, f"{dirname}/raw/study.pkl")

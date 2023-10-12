@@ -4,6 +4,22 @@ from einops.layers.torch import Rearrange
 from torch import nn
 
 
+class PositionalEncoding(nn.Module):
+
+    def __init__(self, dim, dropout = 0.1, max_len = 5000):
+        super().__init__()
+        self.dropout = nn.Dropout(p=dropout)
+        position = torch.arange(max_len).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, dim, 2) * (-torch.log(torch.tensor(10000.0)) / dim))
+        pe = torch.zeros(max_len, 1, dim)
+        pe[:, 0, 0::2] = torch.sin(position * div_term)
+        pe[:, 0, 1::2] = torch.cos(position * div_term)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        x = x + self.pe[:x.size(0)]
+        return self.dropout(x)
+
 class PreNorm(nn.Module):
     def __init__(self, dim, fn):
         super().__init__()
@@ -183,6 +199,44 @@ class PreConvTransformer(nn.Module):
         cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
         x, ps = pack([cls_tokens, x], "b * d")
         x += self.pos_embedding[:, : (n + 1)]
+        x = self.dropout(x)
+        x = self.transformer(x)
+        cls_tokens, _ = unpack(x, ps, "b * d")
+        return self.mlp_head(cls_tokens)
+
+class PreConvPositionalEncodingTransformer(nn.Module):
+    def __init__(
+        self,
+        *,
+        hidden_ch,
+        num_classes,
+        input_dim,
+        hidden_dim,
+        depth,
+        heads,
+        mlp_dim,
+        channels=3,
+        dim_head=64,
+        dropout=0.0,
+        emb_dropout=0.0
+    ):
+        super().__init__()
+        self.convbackbone = ConvBackbone(input_ch=channels, transformer_ch=hidden_ch)
+        self.to_embedding = nn.Linear(input_dim, hidden_dim, bias=False)
+        self.positional_encoding = PositionalEncoding(hidden_dim, dropout, max_len=hidden_ch)
+        self.cls_token = nn.Parameter(torch.randn(hidden_dim))
+        self.dropout = nn.Dropout(emb_dropout)
+        self.transformer = Transformer(hidden_dim, depth, heads, dim_head, mlp_dim, dropout)
+        self.mlp_head = nn.Sequential(nn.LayerNorm(hidden_dim), nn.Linear(hidden_dim, num_classes))
+
+    def forward(self, series):
+        series = series.permute(0, 2, 1)
+        x = self.convbackbone(series)
+        x = self.to_embedding(x)
+        b, n, _ = x.shape
+        cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
+        x, ps = pack([cls_tokens, x], "b * d")
+        x = self.positional_encoding(x)
         x = self.dropout(x)
         x = self.transformer(x)
         cls_tokens, _ = unpack(x, ps, "b * d")
