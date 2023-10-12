@@ -32,11 +32,6 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
-
-x_train, x_test, y_train, y_test = load_data(
-    LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
-)
-
 # Hyperparameters
 MAX_EPOCH = 200
 BATCH_SIZE = 128
@@ -111,6 +106,9 @@ def normalize(train, test):
 
 
 def run(preprocessor):
+    x_train, x_test, y_train, y_test = load_data(
+        LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
+    )
     print("------------------")
     PREPROCESSFUNC = preprocessor.name
     preprocess = preprocessor.func
