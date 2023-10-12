@@ -287,30 +287,19 @@ def mediandifferencedifferencepreprocessor(data):
     data = difference(data)
     return data
 
-vanilla = vannilapreprocessor()
-gaussian = gaussianpreprocessor()
-median = medianpreprocessor()
-difference = differencepreprocessor()
-differencedifference = differencedifferencepreprocessor()
-integral = integralpreprocessor()
-integralintegral = integralintegralpreprocessor()
-gaussiandifference = gaussiandifferencepreprocessor()
-gaussiandifferencedifference = gaussiandifferencedifferencepreprocessor()
-mediandifference = mediandifferencepreprocessor()
-mediandifferencedifference = mediandifferencedifferencepreprocessor()
 
 preprocessors = {
-    "vanilla": vanilla,
-    "gaussian": gaussian,
-    "median": median,
-    "difference": difference,
-    "differencedifference": differencedifference,
-    "integral": integral,
-    "integralintegral": integralintegral,
-    "gaussiandifference": gaussiandifference,
-    "gaussiandifferencedifference": gaussiandifferencedifference,
-    "mediandifference": mediandifference,
-    "mediandifferencedifference": mediandifferencedifference,
+    "vanilla": vannilapreprocessor,
+    "gaussian": gaussianpreprocessor,
+    "median": medianpreprocessor,
+    "difference": differencepreprocessor,
+    "differencedifference": differencedifferencepreprocessor,
+    "integral": integralpreprocessor,
+    "integralintegral": integralintegralpreprocessor,
+    "gaussiandifference": gaussiandifferencepreprocessor,
+    "gaussiandifferencedifference": gaussiandifferencedifferencepreprocessor,
+    "mediandifference": mediandifferencepreprocessor,
+    "mediandifferencedifference": mediandifferencedifferencepreprocessor,
 }
 
 for name, preprocessor in preprocessors.items():
