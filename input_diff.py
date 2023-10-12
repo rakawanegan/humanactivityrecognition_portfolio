@@ -109,14 +109,19 @@ def normalize(train, test):
         test[:,:,i] = (test[:,:,i] - mean) / std
     return train, test
 
-preprocess_func = [
-    vanilla,
-    absoulte,
-    gaussian_filter,
-    median_filter,
-    difference,
-    integral,
-]
+# we can change this code to preprocess data
+
+PREPROCESSFUNC = "vanilla"
+def preprocess(data):
+    print(f"{PREPROCESSFUNC} preprocess")
+    data = vanilla(data)
+    return data
+
+
+# preprocess data
+x_train = preprocess(x_train)
+x_test = preprocess(x_test)
+
 # axis-wise input
 adm_params = {
     "lr": 0.0001,
@@ -228,5 +233,5 @@ sns.heatmap(
 plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
 plt.ylabel("True label")
 plt.xlabel("Predicted label")
-plt.savefig(f"{dirname}/processed/assets/cross-tab.png")
+plt.savefig(f"{dirname}/processed/assets/{PREPROCESSFUNC}-cross-tab.png")
 report = classification_report(y_test, y_pred, target_names=LABELS)
