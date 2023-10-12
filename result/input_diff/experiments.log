@@ -1,3 +1,6 @@
 Device:  cuda
 Max Epochs:  200
 Early Stopping Reference Size:  5
+------------------
+Loading data...
+Data loaded.
