@@ -109,129 +109,267 @@ def normalize(train, test):
         test[:,:,i] = (test[:,:,i] - mean) / std
     return train, test
 
-# we can change this code to preprocess data
 
-PREPROCESSFUNC = "vanilla"
-def preprocess(data):
-    print(f"{PREPROCESSFUNC} preprocess")
-    data = vanilla(data)
-    return data
+def run(preprocessor):
+    print("------------------")
+    PREPROCESSFUNC = preprocessor.name
+    preprocess = preprocessor.func
+    # preprocess data
+    x_train = preprocess(x_train)
+    x_test = preprocess(x_test)
 
+    # axis-wise input
+    adm_params = {
+        "lr": 0.0001,
+        "betas": (0.9, 0.999),
+        "eps": 1e-08,
+        "weight_decay": 0,
+        "amsgrad": False,
+    }
 
-# preprocess data
-x_train = preprocess(x_train)
-x_test = preprocess(x_test)
+    calr_params = {
+        "T_max": 150,
+        "eta_min": 1e-05,
+        "last_epoch": -1,
+        "verbose": False,
+    }
 
-# axis-wise input
-adm_params = {
-    "lr": 0.0001,
-    "betas": (0.9, 0.999),
-    "eps": 1e-08,
-    "weight_decay": 0,
-    "amsgrad": False,
-}
+    pct_params = {
+        "num_classes": len(LABELS),
+        "input_dim": TIME_PERIODS,
+        "channels": N_FEATURES,
+        "hidden_ch": 25,
+        "hidden_dim": 1024,
+        "depth": 5,
+        "heads": 8,
+        "mlp_dim": 1024,
+        "dropout": 0.01,
+        "emb_dropout": 0.01,
+    }
+    model = PreConvTransformer(**pct_params).to(device)
 
-calr_params = {
-    "T_max": 150,
-    "eta_min": 1e-05,
-    "last_epoch": -1,
-    "verbose": False,
-}
-
-pct_params = {
-    "num_classes": len(LABELS),
-    "input_dim": TIME_PERIODS,
-    "channels": N_FEATURES,
-    "hidden_ch": 25,
-    "hidden_dim": 1024,
-    "depth": 5,
-    "heads": 8,
-    "mlp_dim": 1024,
-    "dropout": 0.01,
-    "emb_dropout": 0.01,
-}
-model = PreConvTransformer(**pct_params).to(device)
-
-loss_function = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), **adm_params)
-scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
+    loss_function = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), **adm_params)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
 
-train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
-test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
-train_loader = DataLoader(
-    train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
-)
-test_loader = DataLoader(
-    test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
-)
+    train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
+    test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
+    train_loader = DataLoader(
+        train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+    )
+    test_loader = DataLoader(
+        test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
+    )
 
-losslist = list()
+    losslist = list()
 
-ep_start = datetime.datetime.now()
-best_model = copy.deepcopy(model)
-for ep in range(1, MAX_EPOCH + 1):
-    losses = list()
-    for batch in train_loader:
-        x, t = batch
+    ep_start = datetime.datetime.now()
+    best_model = copy.deepcopy(model)
+    for ep in range(1, MAX_EPOCH + 1):
+        losses = list()
+        for batch in train_loader:
+            x, t = batch
+            x = x.to(device)
+            t = t.to(device)
+            model.train()
+            optimizer.zero_grad()
+            output = model(x)
+            loss = loss_function(output, t)
+            loss.backward()
+            optimizer.step()
+            losses.append(loss.item())
+        # scheduler.step()
+        ls = np.mean(losses)
+        if ep > calr_params["T_max"]:
+            if min(losslist) > ls:
+                best_model = copy.deepcopy(model)
+            if is_worse(losslist, REF_SIZE, "minimize"):
+                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+                break
+        print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
+        losslist.append(ls)
+        if ep == 1:
+            ep_delta = datetime.datetime.now() - ep_start
+            print(f"Estimated time: {ep_delta * MAX_EPOCH}")
+            print(f"Estimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}")
+            # send_email(
+            #     "Training started",
+            #     f"Training started at {ep_start.strftime('%Y-%m-%d %H:%M:%S')}\nEstimated time: {ep_delta * MAX_EPOCH}\nEstimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}"
+            # )
+    model = best_model
+
+    model.eval()
+
+    y_pred = list()
+    for batch in test_loader:
+        x, _ = batch
         x = x.to(device)
-        t = t.to(device)
-        model.train()
         optimizer.zero_grad()
         output = model(x)
-        loss = loss_function(output, t)
-        loss.backward()
-        optimizer.step()
-        losses.append(loss.item())
-    # scheduler.step()
-    ls = np.mean(losses)
-    if ep > calr_params["T_max"]:
-        if min(losslist) > ls:
-            best_model = copy.deepcopy(model)
-        if is_worse(losslist, REF_SIZE, "minimize"):
-            print(f"early stopping at epoch {ep} with loss {ls:.5f}")
-            break
-    print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
-    losslist.append(ls)
-    if ep == 1:
-        ep_delta = datetime.datetime.now() - ep_start
-        print(f"Estimated time: {ep_delta * MAX_EPOCH}")
-        print(f"Estimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}")
-        # send_email(
-        #     "Training started",
-        #     f"Training started at {ep_start.strftime('%Y-%m-%d %H:%M:%S')}\nEstimated time: {ep_delta * MAX_EPOCH}\nEstimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}"
-        # )
-model = best_model
+        y_pred.append(output.detach().cpu().numpy())
 
-model.eval()
+    y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
+    y_test = y_test.argmax(axis=-1)
 
-y_pred = list()
-for batch in test_loader:
-    x, _ = batch
-    x = x.to(device)
-    optimizer.zero_grad()
-    output = model(x)
-    y_pred.append(output.detach().cpu().numpy())
+    cm = confusion_matrix(y_test, y_pred)
+    cm_df = pd.DataFrame(cm, index=LABELS, columns=LABELS)
 
-y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
-y_test = y_test.argmax(axis=-1)
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(
+        cm_df,
+        annot=True,
+        fmt="d",
+        linewidths=0.5,
+        cmap="Blues",
+        cbar=False,
+        annot_kws={"size": 14},
+        square=True,
+    )
+    plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
+    plt.ylabel("True label")
+    plt.xlabel("Predicted label")
+    plt.savefig(f"{dirname}/{PREPROCESSFUNC}-cross-tab.png")
+    report = classification_report(y_test, y_pred, target_names=LABELS)
+    print(report)
+    print("------------------")
 
-cm = confusion_matrix(y_test, y_pred)
-cm_df = pd.DataFrame(cm, index=LABELS, columns=LABELS)
 
-plt.figure(figsize=(10, 10))
-sns.heatmap(
-    cm_df,
-    annot=True,
-    fmt="d",
-    linewidths=0.5,
-    cmap="Blues",
-    cbar=False,
-    annot_kws={"size": 14},
-    square=True,
-)
-plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
-plt.ylabel("True label")
-plt.xlabel("Predicted label")
-plt.savefig(f"{dirname}/{PREPROCESSFUNC}-cross-tab.png")
-report = classification_report(y_test, y_pred, target_names=LABELS)
+# we can change this code to preprocess data
+
+class vannilapreprocessor:
+    def __init__(self, ):
+        self.name = "vanilla"
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = vanilla(data)
+        return data
+
+class gaussianpreprocessor:
+    def __init__(self, sigma=1.5, k=5):
+        self.name = f"gaussian_{sigma}_{k}"
+        self.sigma = sigma
+        self.k = k
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = gaussian_filter(data, self.sigma, self.k)
+        return data
+
+class medianpreprocessor:
+    def __init__(self, k=5):
+        self.name = f"median_{k}"
+        self.k = k
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = median_filter(data, self.k)
+        return data
+
+class differencepreprocessor:
+    def __init__(self, differential=1):
+        self.name = f"difference_{differential}"
+        self.differential = differential
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = difference(data, self.differential)
+        return data
+
+class differencedifferencepreprocessor:
+    def __init__(self, ):
+        self.name = f"difference_difference"
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = difference(data, 1)
+        data = difference(data, 1)
+        return data
+
+class integralpreprocessor:
+    def __init__(self, ):
+        self.name = f"integral"
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = integral(data)
+        return data
+
+class integralintegralpreprocessor:
+    def __init__(self, ):
+        self.name = f"integral_integral"
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = integral(data)
+        data = integral(data)
+        return data
+
+class gaussiandifferencepreprocessor:
+    def __init__(self, sigma=1.5, k=5, differential=1):
+        self.name = f"gaussian_{sigma}_{k}_difference_{differential}"
+        self.sigma = sigma
+        self.k = k
+        self.differential = differential
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = gaussian_filter(data, self.sigma, self.k)
+        data = difference(data, self.differential)
+        return data
+
+class gaussiandifferencedifferencepreprocessor:
+    def __init__(self, sigma=1.5, k=5):
+        self.name = f"gaussian_{sigma}_{k}_difference_difference"
+        self.sigma = sigma
+        self.k = k
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = gaussian_filter(data, self.sigma, self.k)
+        data = difference(data, 1)
+        data = difference(data, 1)
+        return data
+
+class mediandifferencepreprocessor:
+    def __init__(self, k=5, differential=1):
+        self.name = f"median_{k}_difference_{differential}"
+        self.k = k
+        self.differential = differential
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = median_filter(data, self.k)
+        data = difference(data, self.differential)
+        return data
+
+class mediandifferencedifferencepreprocessor:
+    def __init__(self, k=5):
+        self.name = f"median_{k}_difference_difference"
+        self.k = k
+    def func(self,data):
+        print(f"{self.name} preprocess")
+        data = median_filter(data, self.k)
+        data = difference(data, 1)
+        data = difference(data, 1)
+        return data
+
+vanilla = vannilapreprocessor()
+gaussian = gaussianpreprocessor()
+median = medianpreprocessor()
+difference = differencepreprocessor()
+differencedifference = differencedifferencepreprocessor()
+integral = integralpreprocessor()
+integralintegral = integralintegralpreprocessor()
+gaussiandifference = gaussiandifferencepreprocessor()
+gaussiandifferencedifference = gaussiandifferencedifferencepreprocessor()
+mediandifference = mediandifferencepreprocessor()
+mediandifferencedifference = mediandifferencedifferencepreprocessor()
+
+preprocessors = [
+    vanilla,
+    gaussian,
+    median,
+    difference,
+    differencedifference,
+    integral,
+    integralintegral,
+    gaussiandifference,
+    gaussiandifferencedifference,
+    mediandifference,
+    mediandifferencedifference,
+]
+
+for preprocessor in preprocessors:
+    run(preprocessor)
