@@ -111,10 +111,9 @@ def run(preprocessor):
     )
     print("------------------")
     PREPROCESSFUNC = preprocessor.name
-    preprocess = preprocessor.func
     # preprocess data
-    x_train = preprocess(x_train)
-    x_test = preprocess(x_test)
+    x_train = preprocessor.func(x_train)
+    x_test = preprocessor.func(x_test)
 
     # axis-wise input
     adm_params = {
