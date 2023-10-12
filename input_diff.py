@@ -233,5 +233,5 @@ sns.heatmap(
 plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
 plt.ylabel("True label")
 plt.xlabel("Predicted label")
-plt.savefig(f"{dirname}/processed/assets/{PREPROCESSFUNC}-cross-tab.png")
+plt.savefig(f"{dirname}/{PREPROCESSFUNC}-cross-tab.png")
 report = classification_report(y_test, y_pred, target_names=LABELS)
