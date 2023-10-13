@@ -107,7 +107,7 @@ def normalize(train, test):
     return train, test
 
 
-def run(preprocessor, name):
+def run(preprocessor, name, is_normalize=False, is_transpose=False):
     print("------------------")
     x_train, x_test, y_train, y_test = load_data(
         LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
@@ -115,40 +115,82 @@ def run(preprocessor, name):
     # preprocess data
     x_train = preprocessor(x_train)
     x_test = preprocessor(x_test)
+    if is_transpose:
+        if is_normalize:
+            dirname += "/time-wise-normalized"
+        else:
+            dirname += "/time-wise-non-normalized"
+    else:
+        if is_normalize:
+            dirname += "/axis-wise-normalized"
+        else:
+            dirname += "/axis-wise-non-normalized"
 
-    x_train, x_test = normalize(x_train, x_test)
+    os.makedirs(dirname, exist_ok=True)
 
-    # x_train = rearrange(x_train, "n d c -> n c d")
-    # x_test = rearrange(x_test, "n d c -> n c d")
+    if is_normalize:
+        x_train, x_test = normalize(x_train, x_test)
 
-    # axis-wise input
-    adm_params = {
-        "lr": 0.0001,
-        "betas": (0.9, 0.999),
-        "eps": 1e-08,
-        "weight_decay": 0,
-        "amsgrad": False,
-    }
+    if is_transpose:
+        x_train = rearrange(x_train, "n d c -> n c d")
+        x_test = rearrange(x_test, "n d c -> n c d")
 
-    calr_params = {
-        "T_max": 150,
-        "eta_min": 1e-05,
-        "last_epoch": -1,
-        "verbose": False,
-    }
+        # axis-wise input
+        adm_params = {
+            "lr": 0.001,
+            "betas": (0.95, 0.9),
+            "eps": 1e-09,
+            "weight_decay": 0,
+            "amsgrad": False,
+        }
 
-    pct_params = {
-        "num_classes": len(LABELS),
-        "input_dim": TIME_PERIODS,
-        "channels": N_FEATURES,
-        "hidden_ch": 25,
-        "hidden_dim": 1024,
-        "depth": 5,
-        "heads": 8,
-        "mlp_dim": 1024,
-        "dropout": 0.01,
-        "emb_dropout": 0.01,
-    }
+        calr_params = {
+            "T_max": 150,
+            "eta_min": 1e-05,
+            "last_epoch": -1,
+            "verbose": False,
+        }
+
+        pct_params = {
+            "num_classes": len(LABELS),
+            "input_dim": N_FEATURES,
+            "channels": TIME_PERIODS,
+            "hidden_ch": 100,
+            "hidden_dim": 32,
+            "depth": 1,
+            "heads": 10,
+            "mlp_dim": 256,
+            "dropout": 0.1,
+            "emb_dropout": 0.01,
+        }
+    else:
+        adm_params = {
+            "lr": 0.0001,
+            "betas": (0.9, 0.999),
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": False,
+        }
+
+        calr_params = {
+            "T_max": 150,
+            "eta_min": 1e-05,
+            "last_epoch": -1,
+            "verbose": False,
+        }
+
+        pct_params = {
+            "num_classes": len(LABELS),
+            "input_dim": TIME_PERIODS,
+            "channels": N_FEATURES,
+            "hidden_ch": 25,
+            "hidden_dim": 1024,
+            "depth": 5,
+            "heads": 8,
+            "mlp_dim": 1024,
+            "dropout": 0.01,
+            "emb_dropout": 0.01,
+        }
     model = PreConvTransformer(**pct_params).to(device)
 
     loss_function = nn.CrossEntropyLoss()
@@ -295,18 +337,20 @@ def mediandifferencedifferencepreprocessor(data):
 
 
 preprocessors = {
-    "vanilla": vannilapreprocessor,
-    "gaussian": gaussianpreprocessor,
-    "median": medianpreprocessor,
-    "difference": differencepreprocessor,
-    "differencedifference": differencedifferencepreprocessor,
-    "integral": integralpreprocessor,
-    "integralintegral": integralintegralpreprocessor,
-    "gaussiandifference": gaussiandifferencepreprocessor,
-    "gaussiandifferencedifference": gaussiandifferencedifferencepreprocessor,
-    "mediandifference": mediandifferencepreprocessor,
-    "mediandifferencedifference": mediandifferencedifferencepreprocessor,
+    "1.vanilla": vannilapreprocessor,
+    "2.difference": differencepreprocessor,
+    "3.differencedifference": differencedifferencepreprocessor,
+    "4.median": medianpreprocessor,
+    "5.mediandifference": mediandifferencepreprocessor,
+    "6.mediandifferencedifference": mediandifferencedifferencepreprocessor,
+    "7.gaussian": gaussianpreprocessor,
+    "8.gaussiandifference": gaussiandifferencepreprocessor,
+    "9.gaussiandifferencedifference": gaussiandifferencedifferencepreprocessor,
+    "10.integral": integralpreprocessor,
+    "11.integralintegral": integralintegralpreprocessor,
 }
-
-for name, preprocessor in preprocessors.items():
-    run(preprocessor, name)
+TFlist = [True, False]
+for bool1 in TFlist:
+    for bool2 in TFlist:
+        for name, preprocessor in preprocessors.items():
+            run(preprocessor, name, bool1, bool2)
