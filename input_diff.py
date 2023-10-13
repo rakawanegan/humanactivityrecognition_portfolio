@@ -19,7 +19,6 @@ from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
 
-dirname = "result/input_diff"
 # Same labels will be reused throughout the program
 LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]
 # The number of steps within one time segment
@@ -109,6 +108,7 @@ def normalize(train, test):
 
 def run(preprocessor, name, is_normalize=False, is_transpose=False):
     print("------------------")
+    dirname = "result/input_diff"
     x_train, x_test, y_train, y_test = load_data(
         LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
     )
