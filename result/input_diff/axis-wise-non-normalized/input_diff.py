@@ -116,8 +116,6 @@ def run(preprocessor, name):
     x_train = preprocessor(x_train)
     x_test = preprocessor(x_test)
 
-    x_train, x_test = normalize(x_train, x_test)
-
     # x_train = rearrange(x_train, "n d c -> n c d")
     # x_test = rearrange(x_test, "n d c -> n c d")
 
@@ -242,8 +240,8 @@ def run(preprocessor, name):
 # we can change this code to preprocess data
 
 def vannilapreprocessor(data):
-    data = vanilla(data)
-    return data
+        data = vanilla(data)
+        return data
 
 def gaussianpreprocessor(data):
     data = gaussian_filter(data)
