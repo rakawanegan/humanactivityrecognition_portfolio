@@ -5,7 +5,6 @@ from torch import nn
 
 
 class PositionalEncoding(nn.Module):
-
     def __init__(self, dim, dropout = 0.1, max_len = 5000):
         super().__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -17,7 +16,7 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        x = x + self.pe[:x.size(0)]
+        x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
 class PreNorm(nn.Module):
