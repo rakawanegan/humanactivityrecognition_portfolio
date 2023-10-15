@@ -4,5 +4,6 @@ Early Stopping Reference Size:  5
 ------------------
 Loading data...
 Data loaded.
+dim 32
 x torch.Size([128, 101, 32])
 pe torch.Size([100, 32])
