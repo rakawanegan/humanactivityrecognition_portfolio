@@ -17,9 +17,7 @@ class PositionalEncoding(nn.Module):
         print("dim", dim)
 
     def forward(self, x):
-        print("x", x.shape)
-        print("pe", self.pe[:x.size(1)+1, :].shape)
-        x = x + self.pe[:x.size(1)+1, :]
+        x = x + self.pe[:x.size(1), :]
         return self.dropout(x)
 
 
@@ -226,7 +224,7 @@ class PreConvPositionalEncodingTransformer(nn.Module):
         super().__init__()
         self.convbackbone = ConvBackbone(input_ch=channels, transformer_ch=hidden_ch)
         self.to_embedding = nn.Linear(input_dim, hidden_dim, bias=False)
-        self.positional_encoding = PositionalEncoding(hidden_dim, dropout, max_len=hidden_ch)
+        self.positional_encoding = PositionalEncoding(hidden_dim, dropout, max_len=hidden_ch + 1)
         self.cls_token = nn.Parameter(torch.randn(hidden_dim))
         self.dropout = nn.Dropout(emb_dropout)
         self.transformer = Transformer(hidden_dim, depth, heads, dim_head, mlp_dim, dropout)
