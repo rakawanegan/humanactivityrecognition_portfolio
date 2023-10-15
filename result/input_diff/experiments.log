@@ -5,5 +5,3 @@ Early Stopping Reference Size:  5
 Loading data...
 Data loaded.
 <class 'numpy.ndarray'>
-torch.Size([128, 101, 32])
------------------------------------
