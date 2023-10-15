@@ -196,7 +196,6 @@ def run(preprocessor, name, is_normalize=False, is_transpose=False):
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), **adm_params)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
-    print(type(x_train))
 
 
     train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
