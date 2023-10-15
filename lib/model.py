@@ -6,7 +6,7 @@ from torch import nn
 
 class PositionalEncoding(nn.Module):
     def __init__(self, dim, dropout = 0.1, max_len = 5000):
-        super().__init__()
+        super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         position = torch.arange(max_len).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, dim, 2) * (-torch.log(torch.tensor(10000.0)) / dim))
@@ -16,8 +16,9 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        x = x + self.pe[:x.size(1), :]
+        x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
+
 
 class PreNorm(nn.Module):
     def __init__(self, dim, fn):
@@ -235,8 +236,6 @@ class PreConvPositionalEncodingTransformer(nn.Module):
         b, n, _ = x.shape
         cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
         x, ps = pack([cls_tokens, x], "b * d")
-        print(x.shape)
-        print("-----------------------------------")
         x = self.positional_encoding(x)
         x = self.dropout(x)
         x = self.transformer(x)
