@@ -235,6 +235,8 @@ class PreConvPositionalEncodingTransformer(nn.Module):
         b, n, _ = x.shape
         cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
         x, ps = pack([cls_tokens, x], "b * d")
+        print(x.shape)
+        print("-----------------------------------")
         x = self.positional_encoding(x)
         x = self.dropout(x)
         x = self.transformer(x)
