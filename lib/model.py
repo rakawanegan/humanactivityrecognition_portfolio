@@ -14,6 +14,7 @@ class PositionalEncoding(nn.Module):
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         self.register_buffer('pe', pe)
+        print("dim", dim)
 
     def forward(self, x):
         print("x", x.shape)
