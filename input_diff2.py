@@ -14,7 +14,7 @@ import seaborn as sns
 from einops import rearrange
 from torch.utils.data import DataLoader
 
-from lib.model import VanillaTransformer
+from lib.model import VanillaPositionalEncordingTransformer as VanillaTransformer
 from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
@@ -108,7 +108,7 @@ def normalize(train, test):
 
 def run(preprocessor, name, is_normalize=False, is_transpose=False):
     print("------------------")
-    dirname = "result/input_diff/Vanilla/PositionalEmbedding"
+    dirname = "result/input_diff/Vanilla/PositionalEncording"
     x_train, x_test, y_train, y_test = load_data(
         LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
     )
