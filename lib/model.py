@@ -242,3 +242,69 @@ class PreConvPositionalEncodingTransformer(nn.Module):
         x = self.transformer(x)
         cls_tokens, _ = unpack(x, ps, "b * d")
         return self.mlp_head(cls_tokens)
+
+
+class VanillaTransformer:
+    def __init__(
+        self,
+        *,
+        num_classes,
+        input_dim,
+        depth,
+        heads,
+        mlp_dim,
+        channels=3,
+        dim_head=64,
+        dropout=0.0,
+        emb_dropout=0.0
+    ):
+        super().__init__()
+        self.pos_embedding = nn.Parameter(torch.randn(1, channels + 1, input_dim))
+        self.cls_token = nn.Parameter(torch.randn(input_dim))
+        self.dropout = nn.Dropout(emb_dropout)
+        self.transformer = Transformer(input_dim, depth, heads, dim_head, mlp_dim, dropout)
+        self.mlp_head = nn.Sequential(nn.LayerNorm(input_dim), nn.Linear(input_dim, num_classes))
+
+    def forward(self, series):
+        series = series.permute(0, 2, 1)
+        b, n, _ = series.shape
+        cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
+        x, ps = pack([cls_tokens, series], "b * d")
+        x += self.pos_embedding[:, : (n + 1)]
+        x = self.dropout(x)
+        x = self.transformer(x)
+        cls_tokens, _ = unpack(x, ps, "b * d")
+        return self.mlp_head(cls_tokens)
+
+
+class VanillaPositionalEncordingTransformer:
+    def __init__(
+        self,
+        *,
+        num_classes,
+        input_dim,
+        depth,
+        heads,
+        mlp_dim,
+        channels=3,
+        dim_head=64,
+        dropout=0.0,
+        emb_dropout=0.0
+    ):
+        super().__init__()
+        self.positional_encoding = PositionalEncoding(input_dim, dropout, max_len=channels + 1)
+        self.cls_token = nn.Parameter(torch.randn(input_dim))
+        self.dropout = nn.Dropout(emb_dropout)
+        self.transformer = Transformer(input_dim, depth, heads, dim_head, mlp_dim, dropout)
+        self.mlp_head = nn.Sequential(nn.LayerNorm(input_dim), nn.Linear(input_dim, num_classes))
+
+    def forward(self, series):
+        series = series.permute(0, 2, 1)
+        b, n, _ = series.shape
+        cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
+        x, ps = pack([cls_tokens, series], "b * d")
+        x = self.positional_encoding(x)
+        x = self.dropout(x)
+        x = self.transformer(x)
+        cls_tokens, _ = unpack(x, ps, "b * d")
+        return self.mlp_head(cls_tokens)

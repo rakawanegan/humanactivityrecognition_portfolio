@@ -14,7 +14,7 @@ import seaborn as sns
 from einops import rearrange
 from torch.utils.data import DataLoader
 
-from lib.model import PreConvPositionalEncodingTransformer as PreConvTransformer
+from lib.model import VanillaTransformer
 from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
@@ -106,9 +106,9 @@ def normalize(train, test):
     return train, test
 
 
-def run(preprocessor, name, is_normalize=False, is_transpose=False):
+def PEmbeddingrun(preprocessor, name, is_normalize=False, is_transpose=False):
     print("------------------")
-    dirname = "result/input_diff/PositionalEncoding"
+    dirname = "result/input_diff/Vanilla/PosutionalEmbedding"
     x_train, x_test, y_train, y_test = load_data(
         LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
     )
@@ -134,7 +134,6 @@ def run(preprocessor, name, is_normalize=False, is_transpose=False):
     if is_transpose:
         x_train = rearrange(x_train, "n d c -> n c d")
         x_test = rearrange(x_test, "n d c -> n c d")
-
         # axis-wise input
         adm_params = {
             "lr": 0.001,
@@ -155,8 +154,6 @@ def run(preprocessor, name, is_normalize=False, is_transpose=False):
             "num_classes": len(LABELS),
             "input_dim": N_FEATURES,
             "channels": TIME_PERIODS,
-            "hidden_ch": 100,
-            "hidden_dim": 32,
             "depth": 1,
             "heads": 10,
             "mlp_dim": 256,
@@ -183,15 +180,181 @@ def run(preprocessor, name, is_normalize=False, is_transpose=False):
             "num_classes": len(LABELS),
             "input_dim": TIME_PERIODS,
             "channels": N_FEATURES,
-            "hidden_ch": 25,
-            "hidden_dim": 1024,
             "depth": 5,
             "heads": 8,
             "mlp_dim": 1024,
             "dropout": 0.01,
             "emb_dropout": 0.01,
         }
-    model = PreConvTransformer(**pct_params).to(device)
+    model = VanillaTransformer(**pct_params).to(device)
+
+    loss_function = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), **adm_params)
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
+
+
+    train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
+    test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
+    train_loader = DataLoader(
+        train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+    )
+    test_loader = DataLoader(
+        test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
+    )
+
+    losslist = list()
+
+    ep_start = datetime.datetime.now()
+    best_model = copy.deepcopy(model)
+    for ep in range(1, MAX_EPOCH + 1):
+        losses = list()
+        for batch in train_loader:
+            x, t = batch
+            x = x.to(device)
+            t = t.to(device)
+            model.train()
+            optimizer.zero_grad()
+            output = model(x)
+            loss = loss_function(output, t)
+            loss.backward()
+            optimizer.step()
+            losses.append(loss.item())
+        # scheduler.step()
+        ls = np.mean(losses)
+        if ep > calr_params["T_max"]:
+            if min(losslist) > ls:
+                best_model = copy.deepcopy(model)
+            if is_worse(losslist, REF_SIZE, "minimize"):
+                print(f"early stopping at epoch {ep} with loss {ls:.5f}")
+                break
+        print(f"Epoch {ep + 0:03}: | Loss: {ls:.5f}")
+        losslist.append(ls)
+        if ep == 1:
+            ep_delta = datetime.datetime.now() - ep_start
+            print(f"Estimated time: {ep_delta * MAX_EPOCH}")
+            print(f"Estimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}")
+            # send_email(
+            #     "Training started",
+            #     f"Training started at {ep_start.strftime('%Y-%m-%d %H:%M:%S')}\nEstimated time: {ep_delta * MAX_EPOCH}\nEstimated finish: {datetime.datetime.now() + ep_delta * MAX_EPOCH}"
+            # )
+    model = best_model
+
+    model.eval()
+
+    y_pred = list()
+    for batch in test_loader:
+        x, _ = batch
+        x = x.to(device)
+        optimizer.zero_grad()
+        output = model(x)
+        y_pred.append(output.detach().cpu().numpy())
+
+    y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
+    y_test = y_test.argmax(axis=-1)
+
+    cm = confusion_matrix(y_test, y_pred)
+    cm_df = pd.DataFrame(cm, index=LABELS, columns=LABELS)
+
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(
+        cm_df,
+        annot=True,
+        fmt="d",
+        linewidths=0.5,
+        cmap="Blues",
+        cbar=False,
+        annot_kws={"size": 14},
+        square=True,
+    )
+    plt.title("Kernel \nAccuracy:{0:.3f}".format(accuracy_score(y_test, y_pred)))
+    plt.ylabel("True label")
+    plt.xlabel("Predicted label")
+    plt.savefig(f"{dirname}/{name}-cross-tab.png")
+    report = classification_report(y_test, y_pred, target_names=LABELS)
+    print(report)
+    print("------------------")
+
+def PEncordingrun(preprocessor, name, is_normalize=False, is_transpose=False):
+    print("------------------")
+    dirname = "result/input_diff/Vanilla/PosutionalEncoding"
+    x_train, x_test, y_train, y_test = load_data(
+        LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
+    )
+    # preprocess data
+    x_train = preprocessor(x_train)
+    x_test = preprocessor(x_test)
+    if is_transpose:
+        if is_normalize:
+            dirname += "/time-wise-normalized"
+        else:
+            dirname += "/time-wise-non-normalized"
+    else:
+        if is_normalize:
+            dirname += "/axis-wise-normalized"
+        else:
+            dirname += "/axis-wise-non-normalized"
+
+    os.makedirs(dirname, exist_ok=True)
+
+    if is_normalize:
+        x_train, x_test = normalize(x_train, x_test)
+
+    if is_transpose:
+        x_train = rearrange(x_train, "n d c -> n c d")
+        x_test = rearrange(x_test, "n d c -> n c d")
+        # axis-wise input
+        adm_params = {
+            "lr": 0.001,
+            "betas": (0.95, 0.9),
+            "eps": 1e-09,
+            "weight_decay": 0,
+            "amsgrad": False,
+        }
+
+        calr_params = {
+            "T_max": 150,
+            "eta_min": 1e-05,
+            "last_epoch": -1,
+            "verbose": False,
+        }
+
+        pct_params = {
+            "num_classes": len(LABELS),
+            "input_dim": N_FEATURES,
+            "channels": TIME_PERIODS,
+            "depth": 1,
+            "heads": 10,
+            "mlp_dim": 256,
+            "dropout": 0.1,
+            "emb_dropout": 0.01,
+        }
+    else:
+        adm_params = {
+            "lr": 0.0001,
+            "betas": (0.9, 0.999),
+            "eps": 1e-08,
+            "weight_decay": 0,
+            "amsgrad": False,
+        }
+
+        calr_params = {
+            "T_max": 150,
+            "eta_min": 1e-05,
+            "last_epoch": -1,
+            "verbose": False,
+        }
+
+        pct_params = {
+            "num_classes": len(LABELS),
+            "input_dim": TIME_PERIODS,
+            "channels": N_FEATURES,
+            "depth": 5,
+            "heads": 8,
+            "mlp_dim": 1024,
+            "dropout": 0.01,
+            "emb_dropout": 0.01,
+        }
+    model = VanillaTransformer(**pct_params).to(device)
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), **adm_params)
@@ -352,4 +515,5 @@ TFlist = [True, False]
 for bool1 in TFlist:
     for bool2 in TFlist:
         for name, preprocessor in preprocessors.items():
-            run(preprocessor, name, bool1, bool2)
+            PEmbeddingrun(preprocessor, name, bool1, bool2)
+            PEncordingrun(preprocessor, name, bool1, bool2)
