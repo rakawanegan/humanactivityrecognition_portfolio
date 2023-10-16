@@ -89,6 +89,36 @@ python3 run.py --path [py file name]
 └── run.py: run script
 </pre>
 
+# result
+
+| Preprocessing | Filtering | Processing | Input Axis | Accuracy (Embedding - No Normalization) | Accuracy (Embedding - Normalization) | Accuracy (Triangular Wave - No Normalization) | Accuracy (Triangular Wave - Normalization) |
+| ------------- | --------- | ---------- | ---------- | --------------------------------------- | -------------------------------------- | ----------------------------------------------- | ------------------------------------------ |
+|               |           |            |            |                                           |                                          |                                               |                                          |
+| 1             | None      | None       | Axis       | 95.7%                                     | 94.1%                                    | 93.7%                                        | 93.9%                                    |
+| 2             | None      | 1st Difference | Axis    | 94.6%                                     | 94.5%                                    | 92.9%                                        | 92.2%                                    |
+| 3             | None      | 2nd Difference | Axis    | 96.4%                                     | 93.2%                                    | 93.9%                                        | 94.2%                                    |
+| 4             | Median    | None       | Axis       | 91.5%                                     | 90.1%                                    | 90.1%                                        | 91.2%                                    |
+| 5             | Median    | 1st Difference | Axis    | 91.0%                                     | 89.2%                                    | 90.6%                                        | 88.3%                                    |
+| 6             | Median    | 2nd Difference | Axis    | 90.8%                                     | 90.1%                                    | 90.3%                                        | 90.0%                                    |
+| 7             | Gaussian  | None       | Axis       | 92.0%                                     | 85.4%                                    | 91.3%                                        | 90.7%                                    |
+| 8             | Gaussian  | 1st Difference | Axis    | 90.7%                                     | 87.5%                                    | 92.5%                                        | 87.6%                                    |
+| 9             | Gaussian  | 2nd Difference | Axis    | 91.6%                                     | 88.9%                                    | 92.3%                                        | 88.5%                                    |
+| 10            | None      | 1st Integration | Axis    | 5.6%                                      | 93.4%                                    | 93.9%                                        | 93.0%                                    |
+| 11            | None      | 2nd Integration | Axis    | 95.7%                                     | 94.0%                                    | 11.1%                                        | 93.2%                                    |
+|               |           |            |            |                                           |                                          |                                               |                                          |
+| 12            | None      | None       | Time       | 90.9%                                     | 90.0%                                    | 90.7%                                        | 90.5%                                    |
+| 13            | None      | 1st Difference | Time    | 89.9%                                     | 90.8%                                    | 90.7%                                        | 90.5%                                    |
+| 14            | None      | 2nd Difference | Time    | 90.2%                                     | 89.7%                                    | 90.7%                                        | 90.3%                                    |
+| 15            | Median    | None       | Time       | 86.3%                                     | 86.5%                                    | 84.5%                                        | 87.5%                                    |
+| 16            | Median    | 1st Difference | Time    | 86.1%                                     | 87.2%                                    | 85.7%                                        | 86.9%                                    |
+| 17            | Median    | 2nd Difference | Time    | 86.3%                                     | 85.9%                                    | 85.6%                                        | 86.6%                                    |
+| 18            | Gaussian  | None       | Time       | 86.0%                                     | 87.5%                                    | 85.1%                                        | 86.2%                                    |
+| 19            | Gaussian  | 1st Difference | Time    | 82.9%                                     | 87.6%                                    | 85.2%                                        | 86.5%                                    |
+| 20            | Gaussian  | 2nd Difference | Time    | 84.6%                                     | 86.9%                                    | 86.4%                                        | 85.5%                                    |
+| 21            | None      | 1st Integration | Time    | 90.6%                                     | 90.3%                                    | 90.0%                                        | 91.3%                                    |
+| 22            | None      | 2nd Integration | Time    | 90.2%                                     | 90.1%                                    | 90.2%                                        | 90.2%                                    |
+
+
 # MIT License
 
 Copyright (C) 2023 NakagawaRen
