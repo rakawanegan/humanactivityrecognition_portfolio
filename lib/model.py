@@ -244,7 +244,7 @@ class PreConvPositionalEncodingTransformer(nn.Module):
         return self.mlp_head(cls_tokens)
 
 
-class VanillaTransformer:
+class VanillaTransformer(nn.Module):
     def __init__(
         self,
         *,
@@ -277,7 +277,7 @@ class VanillaTransformer:
         return self.mlp_head(cls_tokens)
 
 
-class VanillaPositionalEncordingTransformer:
+class VanillaPositionalEncordingTransformer(nn.Module):
     def __init__(
         self,
         *,
