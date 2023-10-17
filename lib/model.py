@@ -327,7 +327,7 @@ class ConvTransformer(nn.Module):
         emb_dropout=0.0
     ):
         super().__init__()
-        k_convlayer = 4
+        k_convlayer = 3
         self.convlayer = nn.Sequential(
             nn.ConstantPad1d((k_convlayer//2, k_convlayer//2), 0),
             nn.Conv1d(channels, prehidden_ch, k_convlayer),
