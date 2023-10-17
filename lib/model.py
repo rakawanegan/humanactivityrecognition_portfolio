@@ -330,7 +330,7 @@ class ConvTransformer(nn.Module):
         self.convlayer = nn.Sequential(
             nn.Conv1d(channels, prehidden_ch, 3),
             nn.GELU(),
-            nn.Conv1d(hidden_ch, hidden_ch, 3),
+            nn.Conv1d(prehidden_ch, hidden_ch, 3),
             nn.GELU(),
         )
         self.cls_token = nn.Parameter(torch.randn(input_dim))
