@@ -308,3 +308,43 @@ class VanillaPositionalEncordingTransformer(nn.Module):
         x = self.transformer(x)
         cls_tokens, _ = unpack(x, ps, "b * d")
         return self.mlp_head(cls_tokens)
+
+
+class ConvTransformer(nn.Module):
+    def __init__(
+        self,
+        *,
+        prehidden_ch,
+        hidden_ch,
+        num_classes,
+        input_dim,
+        depth,
+        heads,
+        mlp_dim,
+        channels=3,
+        dim_head=64,
+        dropout=0.0,
+        emb_dropout=0.0
+    ):
+        super().__init__()
+        self.convlayer = nn.Sequential(
+            nn.Conv1d(channels, prehidden_ch, 3),
+            nn.GELU(),
+            nn.Conv1d(hidden_ch, hidden_ch, 3),
+            nn.GELU(),
+        )
+        self.cls_token = nn.Parameter(torch.randn(input_dim))
+        self.dropout = nn.Dropout(emb_dropout)
+        self.transformer = Transformer(input_dim, depth, heads, dim_head, mlp_dim, dropout)
+        self.mlp_head = nn.Sequential(nn.LayerNorm(input_dim), nn.Linear(input_dim, num_classes))
+
+    def forward(self, series):
+        series = series.permute(0, 2, 1)
+        x = self.convlayer(series)
+        b, _, _ = x.shape
+        cls_tokens = repeat(self.cls_token, "d -> b d", b=b)
+        x, ps = pack([cls_tokens, x], "b * d")
+        x = self.dropout(x)
+        x = self.transformer(x)
+        cls_tokens, _ = unpack(x, ps, "b * d")
+        return self.mlp_head(cls_tokens)
