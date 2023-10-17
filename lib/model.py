@@ -327,12 +327,16 @@ class ConvTransformer(nn.Module):
         emb_dropout=0.0
     ):
         super().__init__()
+        k_convlayer = 4
         self.convlayer = nn.Sequential(
-            nn.Conv1d(channels, prehidden_ch, 3),
+            nn.ConstantPad1d((k_convlayer//2, k_convlayer//2), 0),
+            nn.Conv1d(channels, prehidden_ch, k_convlayer),
             nn.GELU(),
-            nn.Conv1d(prehidden_ch, hidden_ch, 3),
+            nn.ConstantPad1d((k_convlayer//2, k_convlayer//2), 0),
+            nn.Conv1d(prehidden_ch, hidden_ch, k_convlayer),
             nn.GELU(),
         )
+
         self.cls_token = nn.Parameter(torch.randn(input_dim))
         self.dropout = nn.Dropout(emb_dropout)
         self.transformer = Transformer(input_dim, depth, heads, dim_head, mlp_dim, dropout)
