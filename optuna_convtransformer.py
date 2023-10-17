@@ -103,6 +103,7 @@ def obj(trial):
         "num_classes": len(LABELS),
         "input_dim": TIME_PERIODS,
         "channels": N_FEATURES,
+        "prehidden_ch": trial.suggest_categorical("prehidden_ch", search_space["prehidden_ch"]),
         "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
         "depth": trial.suggest_categorical("depth", search_space["depth"]),
         "heads": trial.suggest_categorical("heads", search_space["heads"]),
