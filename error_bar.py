@@ -85,7 +85,7 @@ model.add(Conv1D(64, 6, activation="relu"))
 model.add(GlobalMaxPooling1D())
 model.add(Dropout(0.5))
 # activation function is identity
-model.add(Dense(6, activation="identity"))
+model.add(Dense(6, activation="linear"))
 # model.add(Dense(6, activation="softmax"))
 
 print(model.summary())
