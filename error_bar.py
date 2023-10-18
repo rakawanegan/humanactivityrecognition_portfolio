@@ -84,8 +84,6 @@ model.add(Conv1D(96, 8, activation="relu"))
 model.add(Conv1D(64, 6, activation="relu"))
 model.add(GlobalMaxPooling1D())
 model.add(Dropout(0.5))
-# activation function is identity
-# model.add(Dense(6, activation="linear"))
 model.add(Dense(6, activation="softmax"))
 
 print(model.summary())
@@ -106,9 +104,7 @@ history = model.fit(
 
 y_pred = model.predict(x_test)
 y_test = y_test.argmax(axis=-1)
-
 y_pred = pd.DataFrame(y_pred)
-y_test = y_test.argmax(axis=-1)
 y_pred["true"] = y_test
 
 y_pred.to_csv(f"{dirname}/predict.csv")
