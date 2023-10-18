@@ -84,7 +84,9 @@ model.add(Conv1D(96, 8, activation="relu"))
 model.add(Conv1D(64, 6, activation="relu"))
 model.add(GlobalMaxPooling1D())
 model.add(Dropout(0.5))
-model.add(Dense(6, activation="softmax"))
+# activation function is identity
+model.add(Dense(6, activation="identity"))
+# model.add(Dense(6, activation="softmax"))
 
 print(model.summary())
 
@@ -103,6 +105,7 @@ history = model.fit(
 )
 
 y_pred = model.predict(x_test)
+y_test = y_test.argmax(axis=-1)
 
 y_pred = pd.DataFrame(y_pred)
 y_test = y_test.argmax(axis=-1)
