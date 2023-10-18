@@ -103,6 +103,7 @@ history = model.fit(
 )
 
 y_pred = model.predict(x_test)
+y_test = y_test.argmax(axis=-1)
 
 y_pred = pd.DataFrame(y_pred)
 y_test = y_test.argmax(axis=-1)
