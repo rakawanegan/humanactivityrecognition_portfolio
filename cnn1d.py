@@ -79,7 +79,7 @@ with torch.no_grad():
 
 joblib.dump(model, f"{dirname}/raw/model.pt")
 
-y_pred = model.predict(x_test).argmax(axis=-1)
+y_pred = model(x_test).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
 
 predict = pd.DataFrame([y_pred, y_test]).T
