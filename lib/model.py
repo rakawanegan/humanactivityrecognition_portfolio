@@ -16,7 +16,8 @@ class ConvolutionalNetwork(nn.Module):
         self.fc = nn.Linear(64, num_classes)
         self.softmax = nn.Softmax(dim=1)
 
-    def forward(self, x):
+    def forward(self, series):
+        x = series.permute(0, 2, 1)
         x = self.conv1(x)
         x = self.relu(x)
         x = self.conv2(x)
