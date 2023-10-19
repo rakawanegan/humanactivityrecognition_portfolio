@@ -8,11 +8,11 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
-from lib.model import ConvolutionalNetwork1D as CNN1D
+from lib.model import ConvolutionalNetwork as CNN1D
 
 from lib.preprocess import load_data
 
-MODEL_NAME = "cnn1d_tf"
+MODEL_NAME = "cnn1d"
 print(MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
