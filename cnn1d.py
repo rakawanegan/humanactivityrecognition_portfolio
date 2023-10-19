@@ -1,6 +1,6 @@
 import datetime
 import os
-
+import copy
 import joblib
 import numpy as np  # linear algebra
 import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from lib.model import ConvolutionalNetwork as CNN1D
-from lib.local_utils import SeqDataset
+from lib.local_utils import SeqDataset, is_worse
 from lib.preprocess import load_data
 
 MODEL_NAME = "cnn1d"
@@ -46,6 +46,7 @@ num_classes = 6
 
 epochs = 150
 BATCH_SIZE = 1024
+REF_SIZE = 3
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = CNN1D(input_size, num_classes).to(device)
@@ -61,10 +62,12 @@ test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
 
-
+losslist = list()
+model.train()
+best_model = copy.deepcopy(model)
 for epoch in range(epochs):
-    model.train()
-    for i, (sequences, labels) in enumerate(train_loader):
+    losses = list()
+    for sequences, labels in train_loader:
         sequences = sequences.to(device)
         labels = labels.to(device)
         optimizer.zero_grad()
@@ -72,11 +75,18 @@ for epoch in range(epochs):
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-        if (i + 1) % 10 == 0:
-            print(
-                f"Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}"
-            )
+        losses.append(loss.item())
+    ls = np.mean(losses)
+    if epoch > 10:
+        if min(losslist) > ls:
+            best_model = copy.deepcopy(model)
+        if is_worse(loss.item(), best_model, REF_SIZE):
+            break
+    if epoch % 10 == 0:
+        print("Epoch: ", epoch, "Loss: ", loss.item())
+    losslist.append(ls)
 
+model = best_model
 model.eval()
 y_pred = list()
 for batch in test_loader:
