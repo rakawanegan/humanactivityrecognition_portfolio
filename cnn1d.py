@@ -69,7 +69,7 @@ for epoch in range(epochs):
         labels = labels.to(device)
         optimizer.zero_grad()
         outputs = model(sequences)
-        loss = criterion(outputs, labels.long())
+        loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
         if (i + 1) % 10 == 0:
