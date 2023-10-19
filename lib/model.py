@@ -5,7 +5,7 @@ from torch import nn
 
 class ConvolutionalNetwork(nn.Module):
     def __init__(self, input_size, num_classes):
-        super(ConvolutionalNetwork, self).__init()
+        super(ConvolutionalNetwork, self).__init__()
         self.conv1 = nn.Conv1d(input_size, 160, 12)
         self.relu = nn.ReLU()
         self.conv2 = nn.Conv1d(160, 128, 10)
@@ -31,6 +31,7 @@ class ConvolutionalNetwork(nn.Module):
         x = self.fc(x)
         x = self.softmax(x)
         return x
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, dim, dropout = 0.1, max_len = 5000):
