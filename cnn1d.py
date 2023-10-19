@@ -80,7 +80,7 @@ for epoch in range(epochs):
     if epoch > 10:
         if min(losslist) > ls:
             best_model = copy.deepcopy(model)
-        if is_worse(loss.item(), best_model, REF_SIZE):
+        if is_worse(losslist, REF_SIZE, "minimize"):
             break
     if epoch % 10 == 0:
         print("Epoch: ", epoch, "Loss: ", loss.item())
