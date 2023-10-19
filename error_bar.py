@@ -108,7 +108,7 @@ for batch in test_loader:
     output = model(x)
     y_pred.append(output.detach().cpu().numpy())
 
-y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
+y_pred = np.concatenate(y_pred, axis=0)
 y_test = y_test.argmax(axis=-1)
 y_pred = pd.DataFrame(y_pred)
 y_pred["true"] = y_test
