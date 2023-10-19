@@ -38,23 +38,19 @@ SEED = 314
 x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
+torch.manual_seed(SEED)
+torch.cuda.manual_seed(SEED)
 
 input_size = x_train.shape[2]
 num_classes = 6
-model = CNN1D(input_size, num_classes)
-
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.RMSprop(model.parameters())
 
 epochs = 150
 BATCH_SIZE = 1024
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-x_train = torch.from_numpy(x_train).float()
-y_train = torch.from_numpy(np.argmax(y_train, axis=1))
-
-x_test = torch.from_numpy(x_test).float()
-y_test = torch.from_numpy(np.argmax(y_test, axis=1))
+model = CNN1D(input_size, num_classes).to(device)
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.RMSprop(model.parameters())
 
 train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
 test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
@@ -65,7 +61,6 @@ test_loader = DataLoader(
     test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
 )
 
-model = CNN1D(input_size, num_classes).to(device)
 
 for epoch in range(epochs):
     model.train()
