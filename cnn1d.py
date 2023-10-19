@@ -7,9 +7,9 @@ import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader
 from lib.model import ConvolutionalNetwork as CNN1D
-
+from lib.local_utils import SeqDataset
 from lib.preprocess import load_data
 
 MODEL_NAME = "cnn1d"
@@ -47,7 +47,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.RMSprop(model.parameters())
 
 epochs = 150
-batch_size = 1024
+BATCH_SIZE = 1024
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 x_train = torch.from_numpy(x_train).float()
 y_train = torch.from_numpy(np.argmax(y_train, axis=1))
@@ -55,32 +56,50 @@ y_train = torch.from_numpy(np.argmax(y_train, axis=1))
 x_test = torch.from_numpy(x_test).float()
 y_test = torch.from_numpy(np.argmax(y_test, axis=1))
 
-for epoch in range(epochs):
-    for i in range(0, len(x_train), batch_size):
-        inputs = x_train[i:i+batch_size]
-        labels = y_train[i:i+batch_size]
+train = SeqDataset(torch.from_numpy(x_train).float(), torch.from_numpy(y_train).float())
+test = SeqDataset(torch.from_numpy(x_test).float(), torch.from_numpy(y_test).float())
+train_loader = DataLoader(
+    train, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
+)
+test_loader = DataLoader(
+    test, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count()
+)
 
+model = CNN1D(input_size, num_classes).to(device)
+
+for epoch in range(epochs):
+    model.train()
+    for i, (sequences, labels) in enumerate(train_loader):
+        sequences = sequences.to(device)
+        labels = labels.to(device)
         optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
+        outputs = model(sequences)
+        loss = criterion(outputs, labels.long())
         loss.backward()
         optimizer.step()
-
-    print(f'Epoch [{epoch+1}/{epochs}], Loss: {loss.item()}')
+        if (i + 1) % 10 == 0:
+            print(
+                f"Epoch [{epoch + 1}/{epochs}], Step [{i + 1}/{len(train_loader)}], Loss: {loss.item():.4f}"
+            )
 
 model.eval()
-with torch.no_grad():
-    outputs = model(x_test)
-    predicted = torch.argmax(outputs, dim=1)
-    correct = (predicted == y_test).sum().item()
-    total = y_test.size(0)
-    accuracy = correct / total
-    print(f'Accuracy on test data: {100 * accuracy:.2f}%')
+y_pred = list()
+for batch in test_loader:
+    x, _ = batch
+    x = x.to(device)
+    optimizer.zero_grad()
+    output = model(x)
+    y_pred.append(output.detach().cpu().numpy())
 
-joblib.dump(model, f"{dirname}/raw/model.pt")
-
-y_pred = model(x_test).argmax(axis=-1).numpy()
+y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
 y_test = y_test.argmax(axis=-1)
+
+torch.save(
+    model.to('cpu').state_dict(),
+    f"{dirname}/raw/model.pt"
+)
+torch.save(y_test, f"{dirname}/raw/y_test.tsr")
+torch.save(x_test, f"{dirname}/raw/x_test.tsr")
 
 predict = pd.DataFrame([y_pred, y_test]).T
 predict.columns = ["predict", "true"]
