@@ -3,6 +3,34 @@ from einops import pack, rearrange, repeat, unpack
 from einops.layers.torch import Rearrange
 from torch import nn
 
+class ConvolutionalNetwork(nn.Module):
+    def __init__(self, input_size, num_classes):
+        super(ConvolutionalNetwork, self).__init()
+        self.conv1 = nn.Conv1d(input_size, 160, 12)
+        self.relu = nn.ReLU()
+        self.conv2 = nn.Conv1d(160, 128, 10)
+        self.conv3 = nn.Conv1d(128, 96, 8)
+        self.conv4 = nn.Conv1d(96, 64, 6)
+        self.pool = nn.AdaptiveMaxPool1d(1)
+        self.dropout = nn.Dropout(0.5)
+        self.fc = nn.Linear(64, num_classes)
+        self.softmax = nn.Softmax(dim=1)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.relu(x)
+        x = self.conv3(x)
+        x = self.relu(x)
+        x = self.conv4(x)
+        x = self.relu(x)
+        x = self.pool(x)
+        x = x.view(x.size(0), -1)
+        x = self.dropout(x)
+        x = self.fc(x)
+        x = self.softmax(x)
+        return x
 
 class PositionalEncoding(nn.Module):
     def __init__(self, dim, dropout = 0.1, max_len = 5000):
