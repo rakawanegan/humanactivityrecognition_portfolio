@@ -5,28 +5,28 @@
 cnn1d
 
 ## Start date
-2023-10-19 12:07:37.444927
+2023-10-19 12:51:29.085435
 
 ## End date
-2023-10-19 12:17:36.206136
+2023-10-19 12:53:27.357455
 
 ## Execution time
-0 hours 9 minutes 58 seconds
+0 hours 1 minutes 58 seconds
 
 ## Report
 | | precision | recall | f1-score | support |
 | --- | --- | --- | --- | --- |
 |  |
-| Downstairs | 0.00 | 0.00 | 0.00 | 755 |
-| Jogging | 0.31 | 1.00 | 0.48 | 2586 |
-| Sitting | 0.00 | 0.00 | 0.00 | 461 |
-| Standing | 0.00 | 0.00 | 0.00 | 352 |
-| Upstairs | 0.00 | 0.00 | 0.00 | 917 |
-| Walking | 0.00 | 0.00 | 0.00 | 3166 |
+| Downstairs | 0.70 | 0.01 | 0.02 | 755 |
+| Jogging | 0.91 | 0.96 | 0.93 | 2586 |
+| Sitting | 0.71 | 0.88 | 0.78 | 461 |
+| Standing | 0.96 | 0.06 | 0.12 | 352 |
+| Upstairs | 0.21 | 0.00 | 0.01 | 917 |
+| Walking | 0.64 | 0.98 | 0.77 | 3166 |
 |  |
-|  accuracy || | 0.31 | 8237 |
-| macro | avg | 0.05 | 0.17 | 0.08 | 8237 |
-| weighted | avg | 0.10 | 0.31 | 0.15 | 8237 |
+|  accuracy || | 0.73 | 8237 |
+| macro | avg | 0.69 | 0.48 | 0.44 | 8237 |
+| weighted | avg | 0.70 | 0.73 | 0.64 | 8237 |
 
 
 ## Optuna search space

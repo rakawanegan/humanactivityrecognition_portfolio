@@ -14,7 +14,7 @@ class ConvolutionalNetwork(nn.Module):
         self.pool = nn.AdaptiveMaxPool1d(1)
         self.dropout = nn.Dropout(0.5)
         self.fc = nn.Linear(64, num_classes)
-        self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, series):
         x = series.permute(0, 2, 1)
@@ -30,7 +30,7 @@ class ConvolutionalNetwork(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
         x = self.fc(x)
-        x = self.softmax(x)
+        # x = self.softmax(x)
         return x
 
 
