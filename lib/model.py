@@ -221,6 +221,7 @@ class PreConvTransformer(nn.Module):
         self.dropout = nn.Dropout(emb_dropout)
         self.transformer = Transformer(hidden_dim, depth, heads, dim_head, mlp_dim, dropout)
         self.mlp_head = nn.Sequential(nn.LayerNorm(hidden_dim), nn.Linear(hidden_dim, num_classes))
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, series):
         series = series.permute(0, 2, 1)
@@ -233,7 +234,9 @@ class PreConvTransformer(nn.Module):
         x = self.dropout(x)
         x = self.transformer(x)
         cls_tokens, _ = unpack(x, ps, "b * d")
-        return self.mlp_head(cls_tokens)
+        cls_tokens = self.mlp_head(cls_tokens)
+        cls_tokens = self.softmax(cls_tokens)
+        return cls_tokens
 
 class PreConvPositionalEncodingTransformer(nn.Module):
     def __init__(
