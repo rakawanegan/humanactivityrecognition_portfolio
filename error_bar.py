@@ -57,7 +57,7 @@ history = model.fit(
 )
 
 
-model.layers[-1].activation = "linear"
+model.layers[-1].activation = None
 
 model.compile(
     loss="categorical_crossentropy", optimizer="rmsprop", metrics=["accuracy"]
