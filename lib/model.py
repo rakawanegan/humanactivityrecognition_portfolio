@@ -30,7 +30,7 @@ class ConvolutionalNetwork(nn.Module):
         x = x.view(x.size(0), -1)
         x = self.dropout(x)
         x = self.fc(x)
-        # x = self.softmax(x)
+        x = self.softmax(x)
         return x
 
 
