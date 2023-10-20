@@ -100,6 +100,9 @@ for epoch in range(epochs):
 
 model = best_model
 model.eval()
+
+model.softmax = nn.Identity()
+
 y_pred = list()
 for batch in test_loader:
     x, _ = batch
