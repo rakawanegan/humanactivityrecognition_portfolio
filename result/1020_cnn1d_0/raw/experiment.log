@@ -1,8 +1,0 @@
-cnn1d
-Start time:  2023-10-20 11:31:06.715489
-Loading data...
-Data loaded.
-Epoch:  0 Loss:  1.7455028295516968
-Epoch:  10 Loss:  1.7276685237884521
-End time:  2023-10-20 11:32:03.222646
-Total time:  0:00:56.507157
