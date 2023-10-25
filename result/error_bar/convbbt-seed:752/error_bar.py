@@ -33,7 +33,7 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
-dirname = f"result/{MODEL_NAME}"
+dirname = f"result/error_bar/{MODEL_NAME}"
 
 x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
