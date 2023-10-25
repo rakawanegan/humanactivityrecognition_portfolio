@@ -15,7 +15,7 @@ from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
 
-MODEL_NAME = "error_bar"
+MODEL_NAME = "convbbt-seed:412"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
