@@ -12,12 +12,12 @@ from sklearn.metrics import accuracy_score
 from torch import nn
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
-from lib.model import ConvTransformer
+from lib.model import PreConvTransformer
 from lib.preprocess import load_data
 from lib.local_utils import is_worse, SeqDataset
 
 
-MODEL_NAME = "optuna_convtransformer"
+MODEL_NAME = "optuna_convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
@@ -39,9 +39,9 @@ x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
 diridx = 0
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
-while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
-    dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+while os.path.exists(f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
     diridx += 1
 
 # Hyperparameters
@@ -73,13 +73,13 @@ adam_searchspace = {
 # }
 
 convbbt_searchspace = {
-    "prehidden_ch": [3, 5, 7, 8, 10, 15, 18, 20, 25, 30, 35,],
-    "hidden_ch": [3, 5, 7, 8, 10, 15, 18, 20, 25, 30, 35,],
+    "hidden_ch": [3, 5, 7, 8, 10, 15],
     "depth": [3, 5, 6, 8],
     "heads": [3, 5, 6, 8, 10],
+    "hidden_dim": [64, 128, 256, 512, 1024],
     "mlp_dim": [256, 512, 1024, 2048],
-    "dropout": [0.01, 0.1, 0.25,],
-    "emb_dropout": [0.01, 0.1, 0.25,],
+    "dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
+    "emb_dropout": [0.01, 0.1, 0.25, 0.5, 0.8],
 }
 
 search_space = adam_searchspace | convbbt_searchspace# | calr_searchspace
@@ -103,7 +103,9 @@ def obj(trial):
         "num_classes": len(LABELS),
         "input_dim": TIME_PERIODS,
         "channels": N_FEATURES,
-        "prehidden_ch": trial.suggest_categorical("prehidden_ch", search_space["prehidden_ch"]),
+        "hidden_dim": trial.suggest_categorical(
+            "hidden_dim", search_space["hidden_dim"]
+        ),
         "hidden_ch": trial.suggest_categorical("hidden_ch", search_space["hidden_ch"]),
         "depth": trial.suggest_categorical("depth", search_space["depth"]),
         "heads": trial.suggest_categorical("heads", search_space["heads"]),
@@ -129,7 +131,7 @@ def obj(trial):
         test, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count()
     )
     criterion = nn.CrossEntropyLoss()
-    model = ConvTransformer(**conbbbt_params).to(device)
+    model = PreConvTransformer(**conbbbt_params).to(device)
     optimizer = torch.optim.Adam(model.parameters(), **adam_params)
     # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 
@@ -181,7 +183,7 @@ study = optuna.create_study(
                         direction="maximize",
                         sampler=optuna.samplers.TPESampler(seed=SEED),
                         study_name=f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}",
-                        # storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
+                        storage=f"sqlite:///result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}/raw/optuna.db",
                         load_if_exists=True,
                         )
 study.optimize(obj, timeout=3600*TIMEOUT_HOURS)
@@ -199,7 +201,7 @@ convbbt_params["num_classes"] = len(LABELS)
 convbbt_params["channels"] = N_FEATURES
 
 loss_function = nn.CrossEntropyLoss()
-model = ConvTransformer(**convbbt_params).to(device)
+model = PreConvTransformer(**convbbt_params).to(device)
 optimizer = torch.optim.Adam(model.parameters(), **adam_params)
 # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, **calr_params)
 

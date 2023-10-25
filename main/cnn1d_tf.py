@@ -22,9 +22,9 @@ print(MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
 diridx = 0
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
-while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
-    dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+while os.path.exists(f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
     diridx += 1
 # Same labels will be reused throughout the program
 LABELS = ["Downstairs", "Jogging", "Sitting", "Standing", "Upstairs", "Walking"]

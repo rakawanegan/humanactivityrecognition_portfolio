@@ -9,14 +9,13 @@ import torch
 from matplotlib import pyplot as plt
 from torch import nn, optim
 from torch.utils.data import DataLoader
-from einops import rearrange
 
 from lib.model import PreConvTransformer
 from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
 
-MODEL_NAME = "transposition_convbbt"
+MODEL_NAME = "convbbt"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
@@ -35,17 +34,14 @@ LABEL = "ActivityEncoded"
 SEED = 314
 
 diridx = 0
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
-while os.path.exists(f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
-    dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
+while os.path.exists(f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
+    dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
     diridx += 1
 
 x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
 )
-
-x_train = rearrange(x_train, "n d c -> n c d")
-x_test = rearrange(x_test, "n d c -> n c d")
 
 # Hyperparameters
 MAX_EPOCH = 200
@@ -75,13 +71,13 @@ calr_params = {
 
 pct_params = {
     "num_classes": len(LABELS),
-    "input_dim": N_FEATURES,
-    "channels": TIME_PERIODS,
-    "hidden_ch": 50,
-    "hidden_dim": 10,
+    "input_dim": TIME_PERIODS,
+    "channels": N_FEATURES,
+    "hidden_ch": 25,
+    "hidden_dim": 1024,
     "depth": 5,
     "heads": 8,
-    "mlp_dim": 30,
+    "mlp_dim": 1024,
     "dropout": 0.01,
     "emb_dropout": 0.01,
 }

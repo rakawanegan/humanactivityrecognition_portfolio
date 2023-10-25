@@ -33,7 +33,7 @@ def main():
     cp_main = run_command(f"cp {args.path}.py {dirname}/raw/")
     print("setup done")
     main = run_command(
-        f"python3 {args.path}.py > {dirname}/raw/experiment.log"
+        f"python3 main/{args.path}.py > {dirname}/raw/experiment.log"
     )
     print("main done")
     pp(dirname)
