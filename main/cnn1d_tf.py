@@ -8,13 +8,15 @@ import pandas as pd  # data processing, CSV file I/O (e.g. pd.read_csv)
 import seaborn as sns
 from keras.layers import Conv1D, Dense, Dropout, GlobalMaxPooling1D
 from keras.models import Model, Sequential
-from keras.utils.np_utils import to_categorical
+from sklearn.preprocessing import LabelEncoder as to_categorical
 from matplotlib import pyplot as plt
 from scipy import stats
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.preprocess import load_data
 
 MODEL_NAME = "cnn1d_tf"

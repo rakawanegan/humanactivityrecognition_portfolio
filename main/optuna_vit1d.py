@@ -12,6 +12,8 @@ from sklearn.metrics import accuracy_score
 from torch import nn
 from torch.utils.data import DataLoader
 
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.model import ViT
 from lib.preprocess import load_data
 from lib.local_utils import is_worse, SeqDataset

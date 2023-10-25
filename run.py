@@ -30,7 +30,7 @@ def main():
     os.makedirs(f"{dirname}/processed")
     os.makedirs(f"{dirname}/processed/assets")
     cp_lib = run_command(f"cp -r lib/ {dirname}/raw/")
-    cp_main = run_command(f"cp {args.path}.py {dirname}/raw/")
+    cp_main = run_command(f"cp main/{args.path}.py {dirname}/raw/")
     print("setup done")
     main = run_command(
         f"python3 main/{args.path}.py > {dirname}/raw/experiment.log"

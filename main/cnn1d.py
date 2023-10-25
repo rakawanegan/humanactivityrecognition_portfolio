@@ -8,6 +8,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.model import ConvolutionalNetwork as CNN1D
 from lib.local_utils import SeqDataset, is_worse
 from lib.preprocess import load_data
