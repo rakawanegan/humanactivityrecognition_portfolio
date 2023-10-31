@@ -10,14 +10,12 @@ from matplotlib import pyplot as plt
 from torch import nn, optim
 from torch.utils.data import DataLoader
 
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.model import PreConvTransformer
 from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
 
-MODEL_NAME = "nonlearned_convbbt"
+MODEL_NAME = "convbbt-nonlearned"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
@@ -35,11 +33,7 @@ LABEL = "ActivityEncoded"
 # set random seed
 SEED = 314
 
-diridx = 0
-dirname = f"result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
-while os.path.exists(f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"):
-    dirname = f"../result/{start_date.strftime('%m%d')}_{MODEL_NAME}_{diridx}"
-    diridx += 1
+dirname = f"result/error_bar/{MODEL_NAME}/"
 
 x_train, x_test, y_train, y_test = load_data(
     LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED
@@ -108,48 +102,9 @@ for batch in test_loader:
     output = model(x)
     y_pred.append(output.detach().cpu().numpy())
 
-y_pred = np.concatenate(y_pred, axis=0).argmax(axis=-1)
+y_pred = np.concatenate(y_pred, axis=0)
+y_pred = pd.DataFrame(y_pred)
 y_test = y_test.argmax(axis=-1)
+y_pred["true"] = y_test
 
-torch.save(
-    model.to('cpu').state_dict(),
-    f"{dirname}/raw/model.pt"
-)
-torch.save(y_test, f"{dirname}/raw/y_test.tsr")
-torch.save(x_test, f"{dirname}/raw/x_test.tsr")
-
-predict = pd.DataFrame([y_pred, y_test]).T
-predict.columns = ["predict", "true"]
-predict.to_csv(f"{dirname}/raw/predict.csv")
-
-print("Model's state_dict:")
-for param_tensor in model.state_dict():
-    print(param_tensor, "\t", model.state_dict()[param_tensor].size())
-
-print("Optimizer's state_dict:")
-for var_name in optimizer.state_dict():
-    print(var_name, "\t", optimizer.state_dict()[var_name])
-
-end_date = datetime.datetime.now()
-print("End time: ", end_date)
-print("Total time: ", end_date - start_date)
-
-
-param = dict()
-param["MODEL_NAME"] = MODEL_NAME
-param["start_date"] = start_date
-param["end_date"] = end_date
-param["LABELS"] = LABELS
-param["TIME_PERIODS"] = TIME_PERIODS
-param["STEP_DISTANCE"] = STEP_DISTANCE
-param["N_FEATURES"] = N_FEATURES
-param["LABEL"] = LABEL
-param["SEED"] = SEED
-param["MAX_EPOCH"] = MAX_EPOCH
-param["BATCH_SIZE"] = BATCH_SIZE
-param["REF_SIZE"] = REF_SIZE
-param["Adam_params"] = adm_params
-param["CosineAnnealingLRScheduler_params"] = calr_params
-param["Model_params"] = pct_params
-
-joblib.dump(param, f"{dirname}/raw/param.pkl")
+y_pred.to_csv(f"{dirname}/predict.csv")
