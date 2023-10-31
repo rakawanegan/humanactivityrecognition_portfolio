@@ -1,0 +1,7 @@
+MODEL_NAME:  convbbt-nonlearned
+Start time:  2023-10-31 19:50:22.160189
+Loading data...
+Data loaded.
+Device:  cpu
+Max Epochs:  200
+Early Stopping Reference Size:  5
