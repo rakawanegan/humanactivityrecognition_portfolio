@@ -1,0 +1,7 @@
+MODEL_NAME:  vit-nonlearned
+Start time:  2023-10-31 20:05:16.680534
+Loading data...
+Data loaded.
+Device:  cpu
+Max Epochs:  200
+Early Stopping Reference Size:  5

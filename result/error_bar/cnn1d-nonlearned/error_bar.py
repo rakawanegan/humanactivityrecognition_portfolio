@@ -5,7 +5,7 @@ from keras.layers import Conv1D, Dense, Dropout, GlobalMaxPooling1D
 from keras.models import Sequential
 
 
-MODEL_NAME = "cnn1d"
+MODEL_NAME = "cnn1d-nonlearned"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
@@ -41,21 +41,6 @@ model.add(Dropout(0.5))
 model.add(Dense(6, activation="softmax"))
 
 print(model.summary())
-
-model.compile(
-    loss="categorical_crossentropy", optimizer="rmsprop", metrics=["accuracy"]
-)
-
-epochs = 150
-batch_size = 1024
-history = model.fit(
-    x_train,
-    y_train,
-    validation_data=(x_test, y_test),
-    epochs=epochs,
-    batch_size=batch_size,
-)
-
 
 model.layers[-1].activation = None
 
