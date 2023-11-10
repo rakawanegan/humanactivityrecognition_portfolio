@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 import copy
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_rows:int=False):
+def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_rows:int=False, datadir="./data/"):
     print("Loading data...")
     def read_data(file_path):
         column_names = [
@@ -21,7 +22,7 @@ def load_data(LABELS, TIME_PERIODS, STEP_DISTANCE, LABEL, N_FEATURES, SEED, n_ro
         return df
 
     # Load data set containing all the data from csv
-    df = read_data("./data/WISDM_ar_v1.1.csv")
+    df = read_data(os.path.join(datadir, "WISDM_ar_v1.1.csv"))
 
     # Transform the labels from String to Integer via LabelEncoder
     le = LabelEncoder()
