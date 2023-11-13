@@ -8,8 +8,8 @@ from lib.local_utils import send_email, run_command
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path", type=str, default="vit1d")
-    parser.add_argument("--git", type=str, default="")
+    parser.add_argument("--path", type=str, default="convbbt", help="path of main file")
+    parser.add_argument("--git", type=str, default="", help="push or not(you have to set your git repository)")
     args = parser.parse_args()
     return args
 
