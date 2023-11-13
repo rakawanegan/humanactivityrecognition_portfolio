@@ -9,7 +9,7 @@ from lib.local_utils import send_email, run_command
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, default="vit1d")
-    parser.add_argument("--git", type=str, default="push")
+    parser.add_argument("--git", type=str, default="")
     args = parser.parse_args()
     return args
 
