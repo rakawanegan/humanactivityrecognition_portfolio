@@ -15,7 +15,7 @@ from lib.preprocess import load_data
 from lib.local_utils import send_email, is_worse, SeqDataset
 
 
-MODEL_NAME = "convbbt-layer:1"
+MODEL_NAME = "convbbt-layer:9"
 print("MODEL_NAME: ", MODEL_NAME)
 start_date = datetime.datetime.now()
 print("Start time: ", start_date)
@@ -71,7 +71,7 @@ pct_params = {
     "channels": N_FEATURES,
     "hidden_ch": 25,
     "hidden_dim": 1024,
-    "depth": 1,
+    "depth": 9,
     "heads": 8,
     "mlp_dim": 1024,
     "dropout": 0.01,
