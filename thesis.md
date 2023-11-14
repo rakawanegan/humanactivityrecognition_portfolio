@@ -37,23 +37,21 @@
 
 # 1. 緒言
 ## 1.1. 研究背景
-深層学習を用いた人間行動識別では、誤検知が重要な問題となっています。誤検知が発生すると、安全保障システムや健康モニタリングなどの分野で深刻な影響を及ぼす可能性があります。たとえば、正常な行動を異常として検知してしまうことが、適切な対応を難しくし、システムの信頼性を低下させます。
+深層学習を用いた人間行動識別では、誤検知が重要な問題となっている。誤検知が発生すると、安全保障システムや健康モニタリングなどの分野で深刻な影響を及ぼす可能性がある。たとえば、正常な行動を異常として検知してしまうことが、適切な対応を難しくし、システムの信頼性を低下させる。
 
-単一の予測のみではなく、階層化予測が重要である理由を強調します。階層化予測は、異なる精度や信頼性の予測を段階的に行うことで、誤検知のリスクを軽減し、高い精度での予測を提供します。このアプローチは、システムの信頼性向上に貢献します。
+単一の予測のみではなく、階層化予測が重要である理由を強調する。階層化予測は、異なる精度や信頼性の予測を段階的に行うことで、誤検知のリスクを軽減し、高い精度での予測を行う。このアプローチは、システムの信頼性向上に貢献する。
 
-最近の深層学習技術において、Transformerが顕著な存在となっています。その理由や特性に触れ、自然言語処理や画像認識、音声識別などの分野での成功例を取り上げることが重要です。特に、Transformerの特性が時系列データや人間行動の認識にどのように適用されているかを説明します。
-
-人間行動識別におけるTransformerの応用研究は、その特性と利点を活かし、階層化予測への適用可能性を示すことが重要です。Transformerがどのように行動認識の精度や信頼性向上に寄与するか、実例や成功事例を挙げることで、このテーマの重要性を強調します。
+人間行動識別におけるTransformerの応用研究として、その特性と利点を活かし、階層化予測への適用可能性を示す。Transformerがどのように行動認識の精度や信頼性向上に寄与するか、実例を提供する。
 
 ## 1.2. 研究概要
 この研究は、深層学習と人間行動識別のベンチマークであるWISDMデータセットを用いて人間の行動を認識し、その予測の確度を評価し、信頼性の高さに応じた階層化予測を行う。
 
 # 2. 研究手法
 ## 2.1. データI/O
-WISDM(Wireless Sensor Data Mining)datasetは2010年に携帯電話を用いて人の行動状態と加速度を取得し、集めたデータセット。
+WISDM(Wireless Sensor Data Mining)datasetは2010年に携帯電話を用いて人の行動状態と加速度を取得し、集めたデータセットである。
 
-ラベルとして、以下の6つの行動状態と36人分の人間のIDがある。
 行動状態、x軸の加速度、y軸の加速度、z軸の加速度、タイムスタンプ、人間のIDがデータベース形式で保存されている。
+ラベルとして、以下の6つの行動状態がある。
 
 | Actiity     | Counts  | Percentage |  
 |-------------|---------|------------|  
@@ -107,22 +105,22 @@ WISDM(Wireless Sensor Data Mining)datasetは2010年に携帯電話を用いて�
 
 
 ## 2.2. モデル
-モデルには、Conv. BackBone Transformer を用いています。
-Conv. BackBone Transformer は、Convolutional Neural Network (CNN) と Transformer を組み合わせたモデルです。
-以下にアーキテクチャを示します。
+モデルには、Conv. BackBone Transformer を用いた。
+Conv. BackBone Transformer は、Convolutional Neural Network (CNN) と Transformer を組み合わせたモデルである。
+以下にアーキテクチャを示す。
 
 ![convbbt-architechture](assets/convbbt_architechture.png)
 
-各ブロックの説明は以下の通りです。
+各ブロックの説明は以下の通り。
 
-Position Embeddingは、位置エンコーディングのことで、入力データの位置情報を学習可能な埋め込みに変換する処理です。  
-PreNormalizationは、入力データに対して正規化を行う処理です。  
-MSAは、Multi-Head Self-Attentionの略で、TransformerのSelf-Attentionを複数のヘッドで行うことを意味します。  
-MLPは、Multi-Layer Perceptronの略で、全結合層を複数重ねたものです。  
-Transformerブロックでは、すべての変換に残差接続と正規化を行っています。  
-これは、Transformerのアーキテクチャに従っており、学習の安定化に寄与します。  
+Position Embeddingは、位置エンコーディングのことで、入力データの位置情報を学習可能な埋め込みに変換する。  
+PreNormalizationは、入力データに対して正規化を行う。  
+MSAは、Multi-Head Self-Attentionの略で、TransformerのSelf-Attentionを複数のヘッドで行う。  
+MLPは、Multi-Layer Perceptronの略で、全結合層を複数重ねたものである。  
+Transformerブロックでは、すべての変換に残差接続と正規化を行う。  
+これは、Transformerのアーキテクチャに従っており、学習の安定化に寄与する。  
 
-以下に処理の定式化を行います。
+以下に処理の定式化を行う。
 ```math
 # PointwiseConv1d
 loop four times
@@ -145,8 +143,8 @@ loop L times
 y = MLP(cls)
 
 where
-      E = R^*
-      E_pos = R^*
+      E = R^80*1024
+      E_pos = R^1024
       MSA = Concat(head_1, head_2, ..., head_n) * W_o
       head_i = SelfAttention(x) * W_i
       SelfAttention(x) = softmax((x * W_q)(x * W_k)^T) * (x * W_v)
@@ -154,12 +152,12 @@ where
 ```
 
 
-流れとしては、点単位畳み込み層（活性化関数はGERU）を用いて3チャンネルの入力を25チャンネルに変換しアフィン変換によって80次元を1024次元にエンコードしている。
+流れとしては、点単位畳み込み層（活性化関数はGERU）を用いて3チャンネルの入力を25チャンネルに変換しアフィン変換によって80次元を1024次元にエンコードする。
 
-また、点単位畳み込み層は入力が3次元出力が25次元ののMLPを作用させているとも解釈することができる。
+また、点単位畳み込み層は入力が3次元出力が25次元ののMLPを作用させているとも解釈できる。
 その後、CLSトークンを加え、位置エンコーディングとして学習可能な埋め込みを行う。
 
-このあたりの処理は、自然言語用アーキテクチャであるTransformerの処理に最適化させるために行っている。
+このあたりの処理は、自然言語用アーキテクチャであるTransformerの処理に最適化させるために行う。
 
 Transformerとは、自然言語処理の分野で用いられるモデルである。
 Transformerの処理を簡単に説明すると、
@@ -170,7 +168,9 @@ Transformerの処理を簡単に説明すると、
 モデルのバリエーションとして、
 Transformer層の数 L を3，5，7とし3つのモデルを作成した。
 
-
+```note
+Transformerの説明について、誰をペルソナにするか
+```
 ## 2.3. 確度の算出方法
 確度の計算方法は以下の条件を満たす変換を行った。
 
@@ -190,7 +190,7 @@ x = x / sum(x)
 
 深層学習において、モデルの出力は確率分布として解釈する方法にソフトマックス関数がある。
 しかし、ソフトマックス関数には指数関数の特性から値が急激に変化し極端な確率分布となるという欠点がある。
-今回は、ソフトマックス関数を用いず確率分布を算出した。
+今回は、ソフトマックス関数を用いず上記の方法で確率分布を算出した。
 
 ## 2.4. 評価方法
 以下の指標を用いて、モデルの評価を行った。
@@ -213,7 +213,12 @@ x = x / sum(x)
 
 クラスA、クラスB、クラスCの三段階の階層化予測を行った。
 
-![convbbt-99%line-venn](assets/convbbt_99line_venn.png)
+|       | Percentage | ACC   | RCL   | PRC   |F1-Score|
+|-------|------------|-------|-------|-------|--------|
+|クラスA|    72.0%   | 99.5% | 98.6% | 99.0% | 98.8%  |
+|クラスB|    22.4%   | 95.0% | 94.3% | 95.2% | 94.7%  |
+|クラスC|     5.9%   | 43.8% | 40.2% | 36.5% | 36.8%  |
+|合計   |    100%    | 95.3% | 93.2% | 93.8% | 93.4%  |
 
 - クラスAの予測
 各モデルが99%の精度を担保できる閾値でテストデータに対して予測を行った。
@@ -231,27 +236,19 @@ x = x / sum(x)
 全テストデータ7413個に対し、434個のデータが43.8%の精度で正しく予測された。
 これは、全体の5.9%に相当する。
 
-
+- クラス全体
 合計の精度は、95.28%である。
 
-|       | Percentage | ACC   | RCL   | PRC   |F1-Score|
-|-------|------------|-------|-------|-------|--------|
-|クラスA|    72.0%   | 99.5% | 98.6% | 99.0% | 98.8%  |
-|クラスB|    22.4%   | 95.0% | 94.3% | 95.2% | 94.7%  |
-|クラスC|     5.9%   | 43.8% | 40.2% | 36.5% | 36.8%  |
-|合計   |    100%    | 95.3% | 93.2% | 93.8% | 93.4%  |
-
-```note
-もうすこし図表に言及する
-情報過多になりそうで保留していますが、
-Confusion Matrixもあったほうがいい？
-```
 
 ## 3.2. 考察
 他論文との比較を行う。
 他論文で提唱されているのはあくまで全体の精度であり、階層化予測の精度については言及されていない。
 
 しかし階層化予測の重要性について、
+
+以下にモデルの予測したインデックスのベン図を示す。
+
+![convbbt-99%line-venn](assets/convbbt_99line_venn.png)
 
 全体の精度としてSOTAは、9%である。
 
@@ -271,8 +268,7 @@ SoTAについて詳しく調査する
 その結果、全体の精度は95.28%であった。
 これ自体については、SOTAには及ばないが、
 階層化予測によって、クラスAの予測については99.6%の精度で予測できている。
-これは、SOTAの9%を上回る精度である。
-また、モデルのバリエーションを行った結果、Transformer層の数を3としたモデルが最も精度が高かった。
+これは、SOTAを上回る精度である。
 
 ## 4.2. 展望
 改善点として、
@@ -282,11 +278,11 @@ SoTAについて詳しく調査する
 
 # 5. 参考文献
 CNNのKaggle：https://www.kaggle.com/code/paulopinheiro/human-activity-recognition-1d-cnn
-CNNの論文：https://arxiv.org/pdf/1809.08113.pdf
-ViT：https://arxiv.org/pdf/2010.11929.pdf
-元データの論文：https://www.cis.fordham.edu/wisdm/public_files/sensorKDD-2010.pdf
-元Convbbt：https://ieeexplore.ieee.org/document/9393889
-Conformer：https://www.mdpi.com/1424-8220/22/10/3932
+CNNの論文：https://arxiv.org/pdf/1809.08113.pdf  
+ViT：https://arxiv.org/pdf/2010.11929.pdf  
+元データの論文：https://www.cis.fordham.edu/wisdm/public_files/sensorKDD-2010.pdf  
+元Convbbt：https://ieeexplore.ieee.org/document/9393889  
+Conformer：https://www.mdpi.com/1424-8220/22/10/3932  
 ConvBB-BiLSTM：https://qiita.com/NakagawaRen/items/b3f7727e9528866c371f
 
 # 6. 謝辞
@@ -294,64 +290,63 @@ ConvBB-BiLSTM：https://qiita.com/NakagawaRen/items/b3f7727e9528866c371f
 
 # 7. 付録
 ## 7.1. 使用したコード
-今回使用したコードは、以下のリポジトリにて公開しています。
+今回使用したコードは、以下のリポジトリにて公開している。
 コードはすべてPythonで、深層学習用ライブラリであるPytorchを用いて実装を行った。
 https://github.com/rakawanegan/humanactivityrecognition_portfolio
 
 ## 7.1.1 実験の再現方法
-実験結果はすべて、`result`ディレクトリに保存されています。
-また、実験に必要なコードについても同階層の`raw`ディレクトリに保存されています。
+実験結果はすべて、`result`ディレクトリに保存されている。
+また、実験に必要なコードについても同階層の`raw`ディレクトリに保存されている。
 
-追加で変更を行い、実験を希望する場合には`run.py`を実行してください。
-初回実行時に限り以下のリンクよりデータをダウンロードすることに留意してください。
+追加で変更を行い、実験を希望する場合には`run.py`を実行すること。
+初回実行時に限り以下のリンクよりデータをダウンロードすることに留意。
 https://www.cis.fordham.edu/wisdm/includes/datasets/latest/WISDM_ar_latest.tar.gz
 
-実行時には、`--path`オプションに実験したいモデル名を指定してください。
-参照先は`main`ディレクトリとなっています。
-用意しているモデルについては、以下の通りです。
-- convbbt: Conv. BackBone Transformer ※デフォルト
-- cnn1d: Convolutional Neural Network
-- vit1d: Vision Transformer
-- transposition_convbbt: 入力データの転置を行ったConv. BackBone Transformer
-- optuna_convbbt: Optunaを用いたハイパラ最適化を行うConv. BackBone Transformer
-- optuna_vit1d: Optunaを用いたハイパラ最適化を行うVision Transformer
-- optuna_convtransformer: 軽量化したConv. BackBone Transformer
+実行時には、`--path`オプションに実験したいモデル名を指定する。
+参照先は`main`ディレクトリ。
+用意しているモデルについては、以下の通り。
+モデル | 説明
+-------|--------
+convbbt| Conv. BackBone Transformer ※デフォルト
+cnn1d  | Convolutional Neural Network
+vit1d  | Vision Transformer
+transposition_convbbt | 入力データの転置を行ったConv. BackBone Transformer
+optuna_convbbt        | Optunaを用いたハイパラ最適化を行うConv. BackBone Transformer
+optuna_vit1d          | Optunaを用いたハイパラ最適化を行うVision Transformer
+optuna_convtransformer| 軽量化したConv. BackBone Transformer
 
-以下に使用例を示します。
+
+以下に使用例を示す。
 
 ```bash
 $ python run.py --path convbbt --git push
 ```
 
-また、デフォルトではオフにしていますが、リモート先を変更した上で実行している場合に限り--gitオプションにpushを渡すことによって実験結果を即リモートにpushすることができます。
-これによってリモートのGitHubのpush時の通知を有効にしている場合、実験結果が通知されます。
-Optunaを用いた実験を行う場合には非常に長い時間の実験となるため、このオプションを有効にすることを推奨します。
+また、デフォルトではオフにしているが、リモート先を変更した上で実行している場合に限り--gitオプションにpushを渡すことによって実験結果を即リモートにpushすることができる。
+これにより、リモートのGitHubのpush時の通知を有効にしている場合、実験結果が通知される。
+Optunaを用いた実験を行う場合には非常に長い時間の実験となるため、このオプションを有効にすることを推奨する。
 
 ## 7.2. モデルについて
-今回実験にあたり、Conv. BackBone Transformer を用いています。
-しかし、他にもいくつかのモデルを用いて実験を行いました。
-以下にそのモデルについて説明します。
+今回実験にあたり、Conv. BackBone Transformer を用いている。
+しかし、他にもいくつかのモデルを用いて実験を行った。
+以下にそのモデルについて説明する。
 - CNN
 - Vision Transformer
 
-いずれも、Conv. BackBone Transformer と比較をすると確度評価による階層化予測の精度が低下することがわかりました。
+いずれも、Conv. BackBone Transformer と比較をすると確度評価による階層化予測の精度が低下する。
 
 理由として、
 - CNNは確度分布が一様であるため、多数決アルゴリズムによる階層化予測が困難であること。
 - ViTはモデル自体の精度が低いこと。
 
-が挙げられます。
-
-```note
-SoTAを実装する
-```
+が挙げられる。
 
 ## 7.2.1 モデルのハイパーパラメータの決定方法
-モデルのハイパーパラメータの決定には、Optunaを用いています。
-Optunaとは、ベイズ推定を用いたハイパーパラメータの最適化を行うPythonライブラリです。
-Optunaを用いることで、グリッドサーチやランダムサーチよりも効率的にハイパーパラメータの最適化を行うことができます。
-探索空間を定義し、目的関数を定義することで、ハイパーパラメータの最適化を行うことができます。
-時間または回数を指定して探索を行うことができます。
+モデルのハイパーパラメータの決定には、Optunaを用いた。
+Optunaとは、ベイズ推定を用いたハイパーパラメータの最適化を行うPythonライブラリ。
+Optunaを用いることで、グリッドサーチやランダムサーチよりも効率的にハイパーパラメータの最適化を行うことができる。
+探索空間を定義し、目的関数を定義することで、ハイパーパラメータの最適化を行うことができる。
+時間または回数を指定して探索を行うことができる。
 
 Conv. BackBone Transformer について探索結果を以下に示す。
 | パラメータ         | 値                         |
