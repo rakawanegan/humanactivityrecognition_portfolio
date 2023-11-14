@@ -1,4 +1,13 @@
+# 2024年度 卒業論文
 # 深層学習を用いた人間行動識別における確度評価による階層化予測
+
+鳥取大学工学部機械物理系学科  
+物理工学コース  
+B20T1070Y  
+指導教員 小谷岳生 教授
+
+
+<div style="page-break-before:always"></div>
 <!-- TeX形式で入力できるように設定 -->
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
@@ -33,7 +42,7 @@
 [7.1.1 実験の再現方法](#711-実験の再現方法)  
 [7.2 モデルについて](#72-モデルについて)  
 [7.2.1 モデルのハイパーパラメータの決定方法](#721-モデルのハイパーパラメータの決定方法)  
-
+<div style="page-break-before:always"></div>
 
 # 1. 緒言
 ## 1.1. 研究背景
@@ -45,6 +54,7 @@
 
 ## 1.2. 研究概要
 この研究は、深層学習と人間行動識別のベンチマークであるWISDMデータセットを用いて人間の行動を認識し、その予測の確度を評価し、信頼性の高さに応じた階層化予測を行う。
+<div style="page-break-before:always"></div>
 
 # 2. 研究手法
 ## 2.1. データI/O
@@ -102,6 +112,7 @@ WISDM(Wireless Sensor Data Mining)datasetは2010年に携帯電話を用いて�
 モデルの訓練データに19217(70%)、検証データに824(3%)、テストデータに7413(27%)のデータを用いた。
 訓練データとテストデータに関しては完全にランダムに分割し、
 テストデータと検証データに関しては、ラベルの分布が等しくなるように分割した。
+<div style="page-break-before:always"></div>
 
 
 ## 2.2. モデル
@@ -166,6 +177,7 @@ Transformerの処理を簡単に説明すると、
 
 モデルのバリエーションとして、
 Transformer層の数 L を3，5，7とし3つのモデルを作成した。
+<div style="page-break-before:always"></div>
 
 ## 2.3. 確度の算出方法
 モデルの予測結果の確度を算出する。
@@ -196,6 +208,8 @@ x = x / sum(x)
 - RCL(Recall)：再現性（見落率）
 - PRC(Precision)：特異性（的中率）
 - F1-Score：RCLとPRCの調和平均
+<div style="page-break-before:always"></div>
+
 
 # 3. 結果と考察
 ## 3.1. 結果
@@ -233,8 +247,9 @@ x = x / sum(x)
 全テストデータ7413個に対し、434個のデータが43.8%の精度で正しく予測された。
 これは、全体の5.9%に相当する。
 
-- クラス全体
+- クラス全体の予測
 合計の精度は、95.28%である。
+<div style="page-break-before:always"></div>
 
 
 ## 3.2. 考察
@@ -258,6 +273,8 @@ SoTAについて詳しく調査する
 ・Transformerの応用
 ・予測の階層化
 ```
+<div style="page-break-before:always"></div>
+
 
 # 4. 結言
 ## 4.1. まとめ
@@ -272,6 +289,8 @@ SoTAについて詳しく調査する
 - 多数決アルゴリズムはモデルの数に応じて精度工場が見込めるためモデルの数を増やす
 - クラスCの予測については、さらに細分化したクラスを作成し精度向上の上澄みを取る
 - 最終どうしようもないクラスCの処理については、特化したモデルを作成する
+<div style="page-break-before:always"></div>
+
 
 # 5. 参考文献
 CNNのKaggle：https://www.kaggle.com/code/paulopinheiro/human-activity-recognition-1d-cnn
@@ -281,9 +300,13 @@ ViT：https://arxiv.org/pdf/2010.11929.pdf
 元Convbbt：https://ieeexplore.ieee.org/document/9393889  
 Conformer：https://www.mdpi.com/1424-8220/22/10/3932  
 ConvBB-BiLSTM：https://qiita.com/NakagawaRen/items/b3f7727e9528866c371f
+<div style="page-break-before:always"></div>
+
 
 # 6. 謝辞
 今回の研究を進めるにあたり、懇切丁寧にご指導を頂いた鳥取大学工学部機械物理系学科の計算理工学研究室小谷岳生教授、同研究室の藤井一輝さんに深く感謝致します。
+<div style="page-break-before:always"></div>
+
 
 # 7. 付録
 ## 7.1. 使用したコード
@@ -322,6 +345,7 @@ $ python run.py --path convbbt --git push
 また、デフォルトではオフにしているが、リモート先を変更した上で実行している場合に限り--gitオプションにpushを渡すことによって実験結果を即リモートにpushすることができる。
 これにより、リモートのGitHubのpush時の通知を有効にしている場合、実験結果が通知される。
 Optunaを用いた実験を行う場合には非常に長い時間の実験となるため、このオプションを有効にすることを推奨する。
+<div style="page-break-before:always"></div>
 
 ## 7.2. モデルについて
 今回実験にあたり、Conv. BackBone Transformer を用いている。
@@ -337,6 +361,7 @@ Optunaを用いた実験を行う場合には非常に長い時間の実験と�
 - ViTはモデル自体の精度が低いこと。
 
 が挙げられる。
+<div style="page-break-before:always"></div>
 
 ## 7.2.1 モデルのハイパーパラメータの決定方法
 モデルのハイパーパラメータの決定には、Optunaを用いた。
